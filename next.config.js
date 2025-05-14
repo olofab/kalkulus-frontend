@@ -5,7 +5,7 @@ module.exports = {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`
+        destination: 'https://kalkulus-backend-production.up.railway.app/api/:path*' // ✅ må ha https://
       }
     ]
   }
