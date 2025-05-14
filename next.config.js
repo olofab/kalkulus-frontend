@@ -1,13 +1,14 @@
-
 /** @type {import('next').NextConfig} */
-module.exports = {
+const nextConfig = {
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://kalkulus-backend-production.up.railway.app/api/:path*' // ✅ må ha https://
-      }
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
+      },
     ]
-  }
+  },
 }
+
+module.exports = nextConfig
 
