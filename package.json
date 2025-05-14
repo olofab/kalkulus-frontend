@@ -1,0 +1,26 @@
+{
+  "name": "kalkulus-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/icons-material": "^5.11.11",
+    "@mui/material": "^5.11.11",
+    "axios": "^1.4.0",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^5.0.2",
+    "next": "13.4.10",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
+  }
+}
