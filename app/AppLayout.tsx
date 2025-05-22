@@ -14,29 +14,42 @@ export default function AppLayout({ children }: PropsWithChildren) {
   useEffect(() => {
     if (pathname === '/offers') setValue(0)
     else if (pathname === '/offers/new') setValue(1)
+    else if (pathname === '/items') setValue(2)
+
   }, [pathname])
+
+  const isLogIn = pathname === '/login';
 
   return (
     <>
-      <TopBar />
+
+
       <Box component="main" sx={{ paddingTop: 1, paddingBottom: 8 }}>{children}</Box>
-      <Paper
-        sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
-        elevation={3}
-      >
-        <BottomNavigation
-          showLabels
-          value={value}
-          onChange={(e, newValue) => {
-            setValue(newValue)
-            if (newValue === 0) router.push('/offers')
-            if (newValue === 1) router.push('/offers/new')
-          }}
+
+      {
+        !isLogIn &&
+        <Paper
+          sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
+          elevation={3}
         >
-          <BottomNavigationAction label="Oversikt" icon={<ListAltIcon />} />
-          <BottomNavigationAction label="Nytt tilbud" icon={<AddCircleIcon />} />
-        </BottomNavigation>
-      </Paper>
+          <BottomNavigation
+            showLabels
+            value={value}
+            onChange={(e, newValue) => {
+              setValue(newValue)
+              if (newValue === 0) router.push('/dashboard')
+              if (newValue === 1) router.push('/offers/new')
+              if (newValue === 2) router.push('/items')
+
+            }}
+          >
+            <BottomNavigationAction label="Dashboard" icon={<ListAltIcon />} />
+            <BottomNavigationAction label="Nytt tilbud" icon={<AddCircleIcon />} />
+            <BottomNavigationAction label="Vareliste" icon={<ListAltIcon />} />
+
+          </BottomNavigation>
+        </Paper>
+      }
     </>
   )
 }

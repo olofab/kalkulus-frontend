@@ -1,12 +1,14 @@
 // /app/components/OfferTabs.tsx
 'use client'
-import { Box, Button, Divider, List, ListItem, ListItemText, Paper, Stack, Typography, useTheme } from '@mui/material'
+import { Avatar, Box, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, Typography, useTheme } from '@mui/material'
 import { useState } from 'react'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import BuildIcon from '@mui/icons-material/Build'
 import ConstructionIcon from '@mui/icons-material/Construction'
 import FormatPaintIcon from '@mui/icons-material/FormatPaint'
 import { Offer } from '../types/offer'
+import CategoryIcon from '@mui/icons-material/Category'
+import OfferItemList from './OfferItemList'
 
 const icons = [
   <ShoppingCartIcon />, <BuildIcon />, <ConstructionIcon />, <FormatPaintIcon />
@@ -14,11 +16,15 @@ const icons = [
 export default function OfferTabs({
   offer,
   items,
-  onAddClick
+  onAddClick,
+  onUpdated
+
 }: {
   offer: Offer
   items: { name: string; unitPrice: number; quantity: number }[]
-  onAddClick: () => void
+  onAddClick: () => void,
+  onUpdated: () => void
+
 }) {
   const [selectedTab, setSelectedTab] = useState<'items' | 'summary'>('items')
   const theme = useTheme();
@@ -95,25 +101,20 @@ export default function OfferTabs({
                 {offer.totalSum.toFixed(2)} kr</Typography>
             </Stack>
             <Divider sx={{ my: 1 }} />
-            <List>
-              {items.map((item, i) => (
-                <ListItem key={i} disableGutters>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    {icons[i % icons.length]}
-                    <Box>
-                      <Typography variant="body1">{item.name}</Typography>
-                    </Box>
-                  </Stack>
-                  <ListItemText
-                    sx={{ textAlign: 'right' }}
-                    primary={`${(item.unitPrice * item.quantity).toFixed(2)} kr`}
-                  />
-                </ListItem>
-              ))}
-            </List>
+            <OfferItemList items={offer.items} onUpdated={onUpdated} />
+
           </Paper>
         )
       }
     </Box >
   )
+}
+
+function formatPrice(amount: number) {
+  const formatter = new Intl.NumberFormat('no-NO', {
+    style: 'currency',
+    currency: 'NOK',
+    minimumFractionDigits: 2,
+  })
+  return formatter.format(amount)
 }

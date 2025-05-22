@@ -27,3 +27,8 @@ export const addItemToOffer = async (offerId: number, item: { name: string; unit
 export const deleteItem = async (itemId: number): Promise<void> => {
   await axios.delete(`/api/items/${itemId}`)
 }
+
+export const updateOffer = async (id: number, data: Partial<Offer>) => {
+  const res = await axios.put(`/api/offers/${id}`, data)
+  return res.data
+}

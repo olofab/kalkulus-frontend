@@ -1,21 +1,16 @@
 'use client'
 import {
   Box,
-  Divider,
+  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-  Typography,
-  Paper,
+  Grid,
   FormControl,
   InputLabel,
+  MenuItem,
   Select,
   SelectChangeEvent
 } from '@mui/material'
@@ -24,7 +19,6 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import SyncIcon from '@mui/icons-material/Sync'
 import { useState } from 'react'
 import { Offer, OfferStatus } from '../types/offer'
-import axios from 'axios'
 
 export default function OfferActions({
   offer,
@@ -41,56 +35,68 @@ export default function OfferActions({
   const [newStatus, setNewStatus] = useState<OfferStatus>(offer.status)
 
   const handleChangeStatus = async () => {
-    await axios.put(`/api/offers/${offer.id}`, {
-      ...offer,
-      status: newStatus
+    await fetch(`/api/offers/${offer.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...offer, status: newStatus })
     })
     setDialogOpen(false)
     onStatusUpdated()
   }
 
+  const actions = [
+    {
+      icon: <PictureAsPdfIcon fontSize="large" />,
+      label: 'Last ned',
+      onClick: onDownload,
+    },
+    {
+      icon: <SyncIcon fontSize="large" />,
+      label: 'Status',
+      onClick: () => setDialogOpen(true),
+    },
+    {
+      icon: <DeleteIcon fontSize="large" />,
+      label: 'Slett',
+      onClick: () => onDelete(offer.id),
+    },
+  ]
+
   return (
     <>
-      <Paper
-        elevation={0}
-        sx={{
-          mt: 4,
-          borderRadius: 2,
-          p: 2,
-          backgroundColor: 'background.paper',
-        }}
-      >
-        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
           Handlinger
         </Typography>
 
-        <List disablePadding>
-          <ListItemButton onClick={onDownload}>
-            <ListItemIcon>
-              <PictureAsPdfIcon color="primary" />
-            </ListItemIcon>
-            <ListItemText primary="Last ned som PDF" />
-          </ListItemButton>
-
-          <Divider />
-
-          <ListItemButton onClick={() => setDialogOpen(true)}>
-            <ListItemIcon>
-              <SyncIcon color="primary" />
-            </ListItemIcon>
-            <ListItemText primary="Endre status" />
-          </ListItemButton>
-
-          <Divider />
-
-          <ListItemButton onClick={() => onDelete(offer.id)}>
-            <ListItemIcon>
-              <DeleteIcon color="error" />
-            </ListItemIcon>
-            <ListItemText primary="Slett tilbud" />
-          </ListItemButton>
-        </List>
-      </Paper>
+        <Grid container spacing={2}>
+          {actions.map((action, i) => (
+            <Grid item xs={4} key={i}>
+              <Button
+                onClick={action.onClick}
+                fullWidth
+                sx={{
+                  bgcolor: 'background.paper',
+                  borderRadius: '12px',
+                  flexDirection: 'column',
+                  py: 2,
+                  height: 100,
+                  color: '#000',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    bgcolor: '#f5f5f5' // Ingen hovereffekt
+                  }
+                }}
+              >
+                {action.icon}
+                <Typography variant="caption" mt={1}>
+                  {action.label}
+                </Typography>
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Endre status på tilbud</DialogTitle>
@@ -112,7 +118,7 @@ export default function OfferActions({
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Avbryt</Button>
           <Button onClick={handleChangeStatus} variant="contained">
-            Oppdater status
+            Oppdater
           </Button>
         </DialogActions>
       </Dialog>

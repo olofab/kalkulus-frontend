@@ -1,59 +1,45 @@
 'use client'
 import {
-  Box, Button, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent
+  Box, Button, Typography, List, ListItem, ListItemText,
+  TextField, Dialog, DialogTitle, DialogContent, DialogActions, Grid
 } from '@mui/material'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import axios from 'axios'
 import ConstructionIcon from '@mui/icons-material/Construction'
-import FormatPaintIcon from '@mui/icons-material/FormatPaint'
-import GridOnIcon from '@mui/icons-material/GridOn'
-import LayersIcon from '@mui/icons-material/Layers'
+import NumericPad from './NumericPad'
+import { ItemInput } from './types/item'
 
-const predefinedItems = [
-  { name: 'Gipsplate', unitPrice: 49, icon: <LayersIcon fontSize="large" /> },
-  { name: 'Sparkel', unitPrice: 79, icon: <FormatPaintIcon fontSize="large" /> },
-  { name: 'Skruer', unitPrice: 5, icon: <ConstructionIcon fontSize="large" /> },
-  { name: 'Flis', unitPrice: 99, icon: <GridOnIcon fontSize="large" /> },
-]
-
-const NumericPad = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
-  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←']
-
-  return (
-    <Grid container spacing={2} sx={{ mt: 1 }}>
-      {keys.map((key) => (
-        <Grid item xs={4} key={key}>
-          <Button
-            fullWidth
-            variant='contained'
-            sx={{
-              height: 70,
-              fontSize: 24,
-              borderRadius: '50%',
-              color: 'white'
-            }}
-            onClick={() => {
-              if (key === '←') onChange(value.slice(0, -1))
-              else onChange(value + key)
-            }}
-          >
-            {key}
-          </Button>
-        </Grid>
-      ))}
-    </Grid>
-  )
+type ItemTemplate = {
+  id?: number
+  name: string
+  unitPrice: number
+  icon?: JSX.Element
 }
+
 
 export default function AddItemFromList() {
   const { id } = useParams()
   const router = useRouter()
-  const [quantityStr, setQuantityStr] = useState('')
-  const [selected, setSelected] = useState<any>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
 
-  const selectItem = (item: any) => {
+  const [items, setItems] = useState<ItemTemplate[]>([])
+  const [selected, setSelected] = useState<ItemTemplate | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [quantityStr, setQuantityStr] = useState('')
+  const [newItemName, setNewItemName] = useState('')
+  const [newItemPrice, setNewItemPrice] = useState('')
+
+  useEffect(() => {
+    axios.get('/api/items/templates').then(res => {
+      const fetched = res.data.map((item: ItemTemplate) => ({
+        ...item,
+        icon: <ConstructionIcon fontSize="large" />
+      }))
+      setItems(fetched)
+    })
+  }, [])
+
+  const selectItem = (item: ItemTemplate) => {
     setSelected(item)
     setQuantityStr('')
     setDialogOpen(true)
@@ -63,32 +49,82 @@ export default function AddItemFromList() {
     const quantity = parseInt(quantityStr)
     if (!selected || !quantity || quantity <= 0) return
 
-    await axios.post(`/api/offers/${id}/item`, {
+    const payload: ItemInput = {
       name: selected.name,
       unitPrice: selected.unitPrice,
-      quantity
-    })
+      quantity: Number(quantityStr),
+    }
+
+    await axios.post(`/api/offers/${id}/item`, payload)
+
 
     setDialogOpen(false)
-    router.push(`/offers/${id}`) // Gå tilbake til redigeringsskjerm
+    router.push(`/offers/${id}`)
+  }
+
+  const handleAddCustomItem = async () => {
+    const name = newItemName.trim()
+    const price = parseFloat(newItemPrice)
+
+    if (!name || isNaN(price) || price < 0) return
+
+    const res = await axios.post('/api/items/templates', { name, unitPrice: price })
+
+    setItems(prev => [...prev, {
+      ...res.data,
+      icon: <ConstructionIcon fontSize="large" />
+    }])
+    setNewItemName('')
+    setNewItemPrice('')
   }
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h6">Velg vare</Typography>
-      <Grid container spacing={2}>
-        {predefinedItems.map((item, i) => (
-          <Grid item xs={6} key={i}>
-            <Card sx={{ height: 120, textAlign: 'center' }} onClick={() => selectItem(item)}>
-              <CardContent>
-                {item.icon}
-                <Typography variant="subtitle1">{item.name}</Typography>
-                <Typography variant="caption">{item.unitPrice} kr/stk</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+      <Typography variant="h6" gutterBottom>Velg vare</Typography>
+
+      <List>
+        {items.map((item, i) => (
+          <ListItem
+            key={i}
+            button
+            onClick={() => selectItem(item)}
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+          >
+            {item.icon}
+            <ListItemText
+              primary={item.name}
+              secondary={`${item.unitPrice} kr/stk`}
+            />
+          </ListItem>
         ))}
-      </Grid>
+      </List>
+
+      <Box mt={2}>
+        <TextField
+          label="Varenavn"
+          variant="outlined"
+          fullWidth
+          value={newItemName}
+          onChange={(e) => setNewItemName(e.target.value)}
+          sx={{ mb: 1 }}
+        />
+        <TextField
+          label="Enhetspris"
+          variant="outlined"
+          fullWidth
+          type="number"
+          value={newItemPrice}
+          onChange={(e) => setNewItemPrice(e.target.value)}
+          sx={{ mb: 1 }}
+        />
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={handleAddCustomItem}
+        >
+          Legg til vare
+        </Button>
+      </Box>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth>
         <DialogTitle>{selected?.name}</DialogTitle>

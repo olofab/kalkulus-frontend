@@ -12,7 +12,7 @@ export default function TopBar({ title }: { title?: string }) {
   const router = useRouter()
   const { user, loading } = useMockAuth()
 
-  const isHome = pathname === '/offers'
+  const isHome = pathname === '/dashboard'
   const isEditPage = pathname.startsWith('/offers/') && pathname.split('/').length === 3
   const isNewPage = pathname === '/offers/new'
 
