@@ -1,138 +1,225 @@
 'use client'
 
 import {
-  Box, Typography, TextField, Button, List, ListItem, ListItemText,
-  IconButton, Dialog, DialogTitle, DialogContent, DialogActions
+  Box,
+  Typography,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Paper,
+  Drawer,
+  Stack
 } from '@mui/material'
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import ItemListHeader from '../components/ItemListHeader'
+import { Plus, Trash2, Pencil, X } from 'lucide-react'
+import { useState } from 'react'
+import {
+  useItems,
+  useCategories,
+  useCreateItem,
+  useUpdateItem,
+  useDeleteItem
+} from './hooks/useItems'
+import NewItemDrawer from './components/Drawer'
+import EmptyState from '../components/common/EmptyState'
 
-type ItemTemplate = {
+type Item = {
   id: number
   name: string
   unitPrice: number
+  categories: { id: number; name: string }[]
+}
+
+type Category = {
+  id: number
+  name: string
 }
 
 export default function ItemsPage() {
-  const [items, setItems] = useState<ItemTemplate[]>([])
-  const [newItem, setNewItem] = useState({ name: '', unitPrice: '' })
-  const [editing, setEditing] = useState<ItemTemplate | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [editItem, setEditItem] = useState<Item | null>(null)
   const [editPrice, setEditPrice] = useState('')
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<number | null>(null)
-  const [allItems, setAllItems] = useState<ItemTemplate[]>([])
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null)
 
-  const fetchItems = async () => {
-    const res = await axios.get('/api/items/templates')
-    setAllItems(res.data)
-    setItems(res.data)
+  const { data: items = [] } = useItems()
+  const { data: categories = [] } = useCategories()
+  const createItem = useCreateItem()
+  const updateItem = useUpdateItem()
+  const deleteItem = useDeleteItem()
+
+  const groupedItems = categories.reduce((acc: Record<string, Item[]>, cat) => {
+    acc[cat.name] = items.filter(item =>
+      item.categories.some((c) => c.id === cat.id)
+    )
+    return acc
+  }, {})
+
+  const uncategorizedItems = items.filter(item => item.categories.length === 0)
+  if (uncategorizedItems.length > 0) {
+    groupedItems['Annet'] = uncategorizedItems
   }
 
-  useEffect(() => {
-    fetchItems()
-  }, [])
-
-  const confirmDelete = (id: number) => {
-    setItemToDelete(id)
-    setDeleteDialogOpen(true)
-  }
-
-
-  const handleConfirmDelete = async () => {
-    if (itemToDelete === null) return
-    await axios.delete(`/api/items/templates/${itemToDelete}`)
-    setDeleteDialogOpen(false)
-    setItemToDelete(null)
-    fetchItems()
-  }
-
-  const handleEdit = async () => {
-    if (!editing) return
-    const price = parseFloat(editPrice)
-    if (isNaN(price) || price <= 0) return
-    await axios.put(`/api/items/templates/${editing.id}`, { ...editing, unitPrice: price })
-    setEditing(null)
-    fetchItems()
+  const handleEdit = () => {
+    if (!editItem || !editPrice) return
+    const parsedPrice = parseFloat(editPrice)
+    if (isNaN(parsedPrice)) return
+    updateItem.mutate({ id: editItem.id, data: { ...editItem, unitPrice: parsedPrice } })
+    setEditItem(null)
   }
 
   return (
-    <Box p={3}>
-      <Typography variant="h5" mb={2}>Vareliste</Typography>
-      <ItemListHeader
-        onCreated={fetchItems}
-        onSearch={(term) => {
-          const searchTerm = term.trim().toLowerCase()
-          if (!searchTerm) {
-            setItems(allItems) // reset if input is empty
-          } else {
-            setItems(
-              allItems.filter(item =>
-                item.name.toLowerCase().includes(searchTerm)
-              )
-            )
-          }
+    <Box p={2} pt={0}>
+      {items.length === 0 ?
+        <EmptyState
+          title="Ingen lagrede varer"
+          description="Alle lagrede varer og kategorier vil vises her"
+          imageSrc="/illustrations/empty-box.png"
+          actionLabel="Opprett ny vare tilbud"
+          onActionClick={() => setDrawerOpen(true)}
+        />
+        :
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h4" color={'primary'}>Vareliste</Typography>
+          <IconButton onClick={() => setDrawerOpen(true)}>
+            <Plus />
+          </IconButton>
+        </Box>
+      }
+
+
+      {Object.entries(groupedItems).map(([catName, items]) => (
+        <Box key={catName} mb={4}>
+          <Typography variant="h6" mb={1}>{catName}</Typography>
+          <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', mb: 2 }}>
+            {items.length > 0 ? (
+              <List>
+                {items.map((item, index) => (
+                  <ListItem
+                    key={item.id}
+                    sx={{
+                      borderTop: index === 0 ? 'none' : '1px solid #eee',
+                    }}
+                    secondaryAction={
+                      <Box display="flex" gap={1}>
+                        <IconButton onClick={() => {
+                          setEditItem(item)
+                          setEditPrice(item.unitPrice.toString())
+                        }}>
+                          <Pencil size={18} />
+                        </IconButton>
+                        <IconButton onClick={() => setItemToDelete(item)}>
+                          <Trash2 size={18} />
+                        </IconButton>
+                      </Box>
+                    }
+                  >
+                    <ListItemText
+                      primary={item.name}
+                      secondary={`${item.unitPrice.toFixed(2)} kr/stk`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+
+              <Typography variant="body2" px={2} py={2} textAlign="center" color="text.secondary">
+                Ingen varer i denne kategorien
+              </Typography>
+
+            )}
+          </Paper>
+        </Box>
+      ))
+      }
+
+      {/* Drawer for å legge til ny vare */}
+      <NewItemDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onSubmit={(form) => {
+          createItem.mutate({
+            name: form.name,
+            unitPrice: parseFloat(form.unitPrice),
+            categoryIds: form.categoryIds
+          })
+          setDrawerOpen(false)
         }}
       />
-      <List>
-        {items.map((item) => (
-          <ListItem
-            key={item.id}
-            secondaryAction={
-              <>
-                <IconButton onClick={() => {
-                  setEditing(item)
-                  setEditPrice(item.unitPrice.toString())
-                }}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={() => confirmDelete(item.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </>
-            }
-          >
-            <ListItemText
-              primary={item.name}
-              secondary={`${item.unitPrice.toFixed(2)} kr/stk`}
-            />
-          </ListItem>
-        ))}
-      </List>
 
-      {/* Dialog for redigering */}
-      <Dialog open={!!editing} onClose={() => setEditing(null)} fullWidth>
-        <DialogTitle>Rediger pris for {editing?.name}</DialogTitle>
-        <DialogContent>
+      {/* Rediger-dialog */}
+      <Drawer
+        anchor="bottom"
+        open={!!editItem}
+        onClose={() => setEditItem(null)}
+      >
+        {/* Header */}
+        <Box display="flex" alignItems="center" px={3} py={2}>
+          <Typography variant="h6" flexGrow={1}>
+            Rediger {editItem?.name}
+          </Typography>
+          <IconButton edge="end" onClick={() => setEditItem(null)}>
+            <X size={18} />
+          </IconButton>
+        </Box>
+
+        {/* Body */}
+        <Box px={3} py={2} flex="1 1 auto" overflow="auto">
           <TextField
             label="Enhetspris"
             fullWidth
             type="number"
             value={editPrice}
             onChange={(e) => setEditPrice(e.target.value)}
-            sx={{ mt: 2 }}
+            sx={{ mt: 1 }}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditing(null)}>Avbryt</Button>
-          <Button onClick={handleEdit} variant="contained">Lagre</Button>
-        </DialogActions>
-      </Dialog>
+        </Box>
 
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Bekreft sletting</DialogTitle>
-        <DialogContent>
-          <Typography>Er du sikker på at du vil slette denne varen?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Avbryt</Button>
-          <Button onClick={handleConfirmDelete} variant="contained" color="error">
-            Slett
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        {/* Actions */}
+        <Box px={3} py={2}>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button onClick={() => setEditItem(null)}>Avbryt</Button>
+            <Button variant="contained" onClick={handleEdit}>Lagre</Button>
+          </Stack>
+        </Box>
+      </Drawer>
+
+      {/* Slett-dialog */}
+      <Drawer
+        anchor="bottom"
+        open={!!itemToDelete}
+        onClose={() => setItemToDelete(null)}
+      >
+        {/* Header */}
+        <Box display="flex" alignItems="center" px={3} py={2}>
+          <Typography variant="h6" flexGrow={1}>
+            Vil du slette {itemToDelete?.name}?
+          </Typography>
+          <IconButton edge="end" onClick={() => setEditItem(null)}>
+            <X size={18} />
+          </IconButton>
+        </Box>
+        <Box px={3} py={2}>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button onClick={() => setItemToDelete(null)}>Avbryt</Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                deleteItem.mutate(itemToDelete!.id)
+                setItemToDelete(null)
+              }}
+            >
+              Slett
+            </Button>
+          </Stack>
+        </Box>
+      </Drawer>
+    </Box >
   )
 }

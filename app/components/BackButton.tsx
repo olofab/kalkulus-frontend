@@ -9,7 +9,7 @@ export default function BackButton() {
 
   return (
     <IconButton
-      onClick={() => router.push('/dashboard')}
+      onClick={() => router.back()}
       sx={{
         position: 'absolute',
         top: 16,

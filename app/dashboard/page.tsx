@@ -1,7 +1,10 @@
 'use client'
 import {
   Avatar, Box, Chip, IconButton, Stack, TextField, Typography,
-  InputAdornment, Skeleton
+  InputAdornment, Skeleton,
+  Grid,
+  Alert,
+  Link
 } from '@mui/material'
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import AddIcon from '@mui/icons-material/Add'
@@ -9,8 +12,13 @@ import SearchIcon from '@mui/icons-material/Search'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Offer } from '../types/offer'
-import { fetchOffers } from '../lib/api'
+import { apiGet } from '../lib/api'
 import PersonIcon from '@mui/icons-material/Person';
+import { useAppContext } from '../lib/AppContext'
+import dayjs from 'dayjs'
+import SearchBarWithResults from './components/Search'
+import { ClipboardList, PackageSearch, FileSearch } from 'lucide-react'
+
 
 const STATUS_LABELS = {
   all: 'Alle',
@@ -20,17 +28,58 @@ const STATUS_LABELS = {
   rejected: 'Avslått'
 }
 
+const featureCards = [
+  {
+    title: 'Opprett prosjekt',
+    description: 'Lag et nytt tilbud for kunden din på få sekunder.',
+    color: '#E8ECF1',
+    icon: <ClipboardList size={32} color="#2C3E50" strokeWidth={2} />,
+    href: '/offers/new',
+
+  },
+  {
+    title: 'Vareliste',
+    description: 'Full oversikt over alle varer og tjenester du tilbyr.',
+    color: '#F5EFE6',
+    icon: <PackageSearch size={32} color="#2C3E50" strokeWidth={2} />,
+    href: '/items',
+
+  },
+  {
+    title: 'Finn prosjekt',
+    description: 'Se og rediger tidligere tilbud i systemet.',
+    color: '#EAEDED',
+    icon: <FileSearch size={32} color="#2C3E50" strokeWidth={2} />,
+    href: '/offers',
+  },
+]
+
+
 export default function DashboardPage() {
   const router = useRouter()
   const [offers, setOffers] = useState<Offer[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string | null>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const { user } = useAppContext()
+  const [error, setError] = useState<string | null>(null)
+
 
   useEffect(() => {
+    const fetchOffers = async () => {
+      setLoading(true)
+      try {
+        const response = await apiGet('/api/offers')
+        setOffers(response)
+      } catch (err) {
+        console.error('Feil ved henting av tilbud', err)
+        setError('Noe gikk galt ved henting av tilbudene.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchOffers()
-      .then(setOffers)
-      .finally(() => setLoading(false))
   }, [])
 
   const filteredOffers = useMemo(() => {
@@ -39,6 +88,64 @@ export default function DashboardPage() {
       offer.title.toLowerCase().includes(searchTerm.toLowerCase())
     )
   }, [offers, statusFilter, searchTerm])
+
+  const expiresSoon = offers.filter(offer =>
+    dayjs(offer.validUntil).isBefore(dayjs().add(7, 'day'))
+  )
+
+  if (true) {
+    return (
+      <Box p={3} pt={1}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h4" fontWeight={700}>Dashboard</Typography>
+        </Stack>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <SearchBarWithResults />
+        <Grid container spacing={2}>
+          {featureCards.map((card, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <Link href={card.href} style={{ textDecoration: 'none' }}>
+
+                <Box
+                  sx={{
+                    backgroundColor: card.color,
+                    borderRadius: 2,
+                    p: 2,
+                    boxShadow: 0,
+                    height: '100%',
+                  }}
+                >
+                  <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                        {card.title}
+                      </Typography>
+                    </Box>
+                    {card.icon}
+                  </Box>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {card.description}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="primary"
+                    sx={{ mt: 1, display: 'inline-block' }}
+                  >
+                    Klikk for å gå videre
+                  </Typography>
+                </Box>
+              </Link>
+            </Grid>
+          ))}
+        </Grid>
+      </Box >
+    )
+  }
 
   return (
     <Box p={2}>
@@ -53,7 +160,7 @@ export default function DashboardPage() {
           </Avatar>
           <Box>
             <Typography variant="body2" color="text.secondary">Hello,</Typography>
-            <Typography variant="body1" fontWeight={600}>Andreas Bergman</Typography>
+            <Typography variant="body1" fontWeight={600}>{user?.name}</Typography>
           </Box>
         </Stack>
         <IconButton onClick={() => router.push('/notifications')}>
@@ -149,6 +256,8 @@ export default function DashboardPage() {
           ))
         )}
       </Stack>
+
+
     </Box >
   )
 }

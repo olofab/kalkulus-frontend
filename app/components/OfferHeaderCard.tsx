@@ -80,7 +80,7 @@ export default function OfferHeaderCard({
   )
 }
 
-function getStatusColor(status: string): "success" | "warning" | "default" | "error" {
+export function getStatusColor(status: string): "success" | "warning" | "default" | "error" {
   switch (status) {
     case 'accepted': return 'success'
     case 'sent': return 'warning'
@@ -89,8 +89,9 @@ function getStatusColor(status: string): "success" | "warning" | "default" | "er
   }
 }
 
-function getStatusTitle(status: string) {
+export function getStatusTitle(status: string) {
   switch (status) {
+    case 'draft': return 'Utkast'
     case 'accepted': return 'Akseptert'
     case 'sent': return 'Sent'
     case 'rejected': return 'Avslått'

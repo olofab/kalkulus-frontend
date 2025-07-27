@@ -4,10 +4,39 @@ import { CssBaseline, ThemeProvider } from '@mui/material'
 import AppLayout from './AppLayout'
 import theme from '../app/theme'
 import './global.css'
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import LoadingScreen from './components/LoadingScreen'
+import { AppProvider, useAppContext } from './lib/AppContext'
+import { usePathname, useRouter } from 'next/navigation'
+import AuthGate from './components/AuthGate'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+function AuthGate1({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAppContext()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user && pathname !== '/login' && pathname !== '/welcome') {
+        router.replace('/welcome')
+      }
+      if (user && pathname === '/') {
+        router.replace('/dashboard')
+      }
+    }
+  }, [loading, user, pathname])
+
+  if (loading) {
+    return <LoadingScreen />
+  }
+
+  return <>{children}</>
+}
 
 export default function RootLayout({ children }) {
+  const [queryClient] = useState(() => new QueryClient())
+
   return (
     <html lang="no">
       <head>
@@ -19,15 +48,18 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <ThemeProvider theme={theme}>
-
-          <CssBaseline />
-          <Suspense fallback={<LoadingScreen />}>
-
-            <AppLayout>{children}</AppLayout>
-          </Suspense>
-        </ThemeProvider>
-
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <AppProvider>
+              <Suspense fallback={<LoadingScreen />}>
+                <AppLayout>
+                  <AuthGate>{children}</AuthGate>
+                </AppLayout>
+              </Suspense>
+            </AppProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
       </body>
     </html>
   )
