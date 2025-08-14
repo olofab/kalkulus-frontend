@@ -13,7 +13,7 @@ export async function testApiConnection() {
   try {
     // Try to make a simple request to test connectivity
     // You might want to create a /api/health endpoint on your backend
-    const response = await fetch(`${config.apiUrl}/api/health`, {
+    const response = await fetch(`${config.apiUrl}/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
