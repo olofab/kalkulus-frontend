@@ -5,7 +5,7 @@ import {
   Box, TextField, Typography, Button, Stack, Stepper, Step, StepLabel, IconButton,
   useTheme
 } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
+import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -39,7 +39,7 @@ export default function NewOfferForm() {
     description: '',
     validUntil: dayjs().add(30, 'day').format('YYYY-MM-DD'),
     includeVat: true,
-    status: 'draft'
+    status: 'DRAFT'
   })
 
   const createOffer = useCreateOffer()
@@ -95,7 +95,7 @@ export default function NewOfferForm() {
 
       {step > 0 && (
         <IconButton onClick={prevStep} sx={{ mb: 2 }}>
-          <ArrowBack />
+          <ArrowLeft />
         </IconButton>
       )}
 

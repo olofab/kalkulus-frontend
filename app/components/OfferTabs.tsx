@@ -2,16 +2,12 @@
 'use client'
 import { Avatar, Box, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, Typography, useTheme } from '@mui/material'
 import { useState } from 'react'
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import BuildIcon from '@mui/icons-material/Build'
-import ConstructionIcon from '@mui/icons-material/Construction'
-import FormatPaintIcon from '@mui/icons-material/FormatPaint'
+import { ShoppingCart, Wrench, Hammer, Paintbrush, Folder } from 'lucide-react'
 import { Offer } from '../types/offer'
-import CategoryIcon from '@mui/icons-material/Category'
 import OfferItemList from './OfferItemList'
 
 const icons = [
-  <ShoppingCartIcon />, <BuildIcon />, <ConstructionIcon />, <FormatPaintIcon />
+  <ShoppingCart key="1" />, <Wrench key="2" />, <Hammer key="3" />, <Paintbrush key="4" />
 ]
 export default function OfferTabs({
   offer,

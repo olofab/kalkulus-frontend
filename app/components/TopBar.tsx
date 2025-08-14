@@ -1,8 +1,7 @@
 // /app/components/TopBar.tsx
 'use client'
 import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem } from '@mui/material'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { ArrowLeft, MoreVertical } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useMockAuth } from '../lib/hooks/useMockLogin'
@@ -47,7 +46,7 @@ export default function TopBar({ title }: { title?: string }) {
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         {!isHome && (
           <IconButton edge="start" onClick={() => router.back()} sx={{ color: '#fff' }}>
-            <ArrowBackIcon />
+            <ArrowLeft />
           </IconButton>
         )}
         <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center', fontWeight: 'bold' }}>
@@ -56,7 +55,7 @@ export default function TopBar({ title }: { title?: string }) {
         {isEditPage && (
           <>
             <IconButton edge="end" onClick={handleMenu} sx={{ color: '#fff' }}>
-              <MoreVertIcon />
+              <MoreVertical />
             </IconButton>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
               <MenuItem onClick={handleDelete}>Slett</MenuItem>

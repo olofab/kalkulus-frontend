@@ -1,7 +1,7 @@
 'use client'
 
 import { IconButton } from '@mui/material'
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
+import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function BackButton() {
@@ -20,7 +20,7 @@ export default function BackButton() {
         }
       }}
     >
-      <ArrowBackIosNewIcon />
+      <ArrowLeft />
     </IconButton>
   )
 }

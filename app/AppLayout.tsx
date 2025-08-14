@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { PropsWithChildren } from 'react'
 import TopHeader from './components/common/TopHeader'
 import { useAppContext } from './lib/AppContext'
+import Header from './components/common/TopHeader'
 
 const PUBLIC_ROUTES = ['/login', '/auth/register']
 
@@ -18,7 +19,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
   return (
     <Box>
-      {showHeader && <TopHeader userInitial={user?.name?.[0]?.toUpperCase() ?? '?'} />}
+      {showHeader && <Header />}
       <Box component="main" sx={{ paddingBottom: 8 }}>{children}</Box>
     </Box>
   )

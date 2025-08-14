@@ -14,9 +14,7 @@ import { useState } from 'react'
 import { apiGet, apiPut } from '../lib/api'
 import { useRouter } from 'next/navigation'
 import { useAppContext } from '../lib/AppContext'
-import PersonRoundedIcon from '@mui/icons-material/PersonRounded'
-import AlternateEmailRoundedIcon from '@mui/icons-material/AlternateEmailRounded'
-import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded'
+import { User, Mail, Shield } from 'lucide-react'
 import BackButton from '../components/BackButton'
 import AdminUsersPage from './users/page'
 
@@ -112,9 +110,9 @@ export default function ProfilePage() {
 
       {tab === 'Meg' && user && (
         <Stack spacing={2}>
-          <InfoItem icon={<PersonRoundedIcon />} label="Navn" value={user.name} />
-          <InfoItem icon={<AlternateEmailRoundedIcon />} label="E-post" value={user.email} />
-          <InfoItem icon={<AdminPanelSettingsRoundedIcon />} label="Stilling" value={userType} />
+          <InfoItem icon={<User />} label="Navn" value={user.name} />
+          <InfoItem icon={<Mail />} label="E-post" value={user.email} />
+          <InfoItem icon={<Shield />} label="Stilling" value={userType} />
         </Stack>
       )}
 

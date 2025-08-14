@@ -4,21 +4,21 @@ import { useState, useEffect } from 'react'
 import {
   Box,
   InputBase,
-  IconButton,
   Paper,
   Typography,
   Divider,
   List,
-  ListItem,
   ListItemText,
   useTheme,
   CircularProgress,
+  ListItemButton,
+  Avatar,
 } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
-import TuneIcon from '@mui/icons-material/Tune'
-import { ScanSearch, Search } from 'lucide-react'
 import { useOfferSearch } from '../hooks/useOfferSearch'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { Search } from 'lucide-react'
+import { getStatusStyle } from '../../offers/utils/StatusStyle'
 
 export default function SearchBarWithResults() {
   const [query, setQuery] = useState('')
@@ -51,7 +51,7 @@ export default function SearchBarWithResults() {
           boxShadow: 0
         }}
       >
-        <ScanSearch size={24} color={theme.palette.primary.main} strokeWidth={2} />
+        <Search size={24} style={{ marginRight: 8 }} />
         <InputBase
           sx={{ ml: 1, flex: 1 }}
           placeholder="Søk etter tilbud, varer, notater..."
@@ -68,23 +68,40 @@ export default function SearchBarWithResults() {
         </Box>)}
 
       {!isLoading && offers.length > 0 && (
-        <Box mt={1} bgcolor="background.paper" borderRadius={2} boxShadow={0} p={1}>
-          <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
+        <Box mt={1} bgcolor="background.paper" borderRadius={2} boxShadow={0} p={2}>
+          <Typography variant="body1" color="text.secondary" mb={1} sx={{ fontWeight: 'bold' }}>
             Tilbud
           </Typography>
           <Divider sx={{ mb: 1 }} />
           <List dense>
             {offers.map((offer: any) => (
-              <ListItem
-                button
+              <ListItemButton
                 key={offer.id}
                 onClick={() => router.push(`/offers/${offer.id}`)}
+                sx={{
+                  p: 1,
+                  pl: 0,
+                }}
               >
-                <ListItemText
-                  primary={offer.title || 'Uten tittel'}
-                  secondary={`Kunde: ${offer.customer} • ${offer.totalSumWithVat} kr • ${new Date(offer.createdAt).toLocaleDateString()}`}
-                />
-              </ListItem>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Avatar
+                    sx={{
+                      bgcolor: getStatusStyle(offer.status).color,
+                      color: 'primary.main',
+                      width: 32,
+                      height: 32,
+                    }}
+                    variant='rounded'
+                  >
+                    {getStatusStyle(offer.status).icon}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {`${offer.title} • ${offer.customer}`}
+                    </Typography>
+                  </Box>
+                </Box>
+              </ListItemButton>
             ))}
           </List>
         </Box>

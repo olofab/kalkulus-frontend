@@ -17,8 +17,7 @@ import { useState } from 'react'
 import { useCreateUser, useUpdateUser, useUsers } from '../hooks/useUsers'
 import { User, UserType, UserTypeEnum } from '../../types/user'
 import CustomChip, { Severity } from '../../components/common/Chip'
-import AddIcon from '@mui/icons-material/Add'
-import { Divide, UserRoundPen } from 'lucide-react'
+import { Plus, Divide, UserRoundPen } from 'lucide-react'
 
 
 export default function AdminUsersPage() {
@@ -58,7 +57,7 @@ export default function AdminUsersPage() {
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">Brukere</Typography>
         <Button variant="text"
-          startIcon={<AddIcon />} onClick={() => { setForm({}); setOpen(true) }}>
+          startIcon={<Plus />} onClick={() => { setForm({}); setOpen(true) }}>
           Ny bruker
         </Button>
       </Stack>

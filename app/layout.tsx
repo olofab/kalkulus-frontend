@@ -10,6 +10,12 @@ import { AppProvider, useAppContext } from './lib/AppContext'
 import { usePathname, useRouter } from 'next/navigation'
 import AuthGate from './components/AuthGate'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs'
+import 'dayjs/locale/nb' // norsk
+dayjs.locale('nb')
+
 
 function AuthGate1({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAppContext()
@@ -50,14 +56,17 @@ export default function RootLayout({ children }) {
       <body>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <AppProvider>
-              <Suspense fallback={<LoadingScreen />}>
-                <AppLayout>
-                  <AuthGate>{children}</AuthGate>
-                </AppLayout>
-              </Suspense>
-            </AppProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="nb">
+
+              <CssBaseline />
+              <AppProvider>
+                <Suspense fallback={<LoadingScreen />}>
+                  <AppLayout>
+                    <AuthGate>{children}</AuthGate>
+                  </AppLayout>
+                </Suspense>
+              </AppProvider>
+            </LocalizationProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </body>

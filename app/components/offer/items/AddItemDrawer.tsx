@@ -36,7 +36,7 @@ export default function AddItemDrawer({ open, onClose, onAddItem }: Props) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
 
   return (
-    <Drawer anchor="bottom" open={open} onClose={onClose} PaperProps={{ sx: { height: '80%' } }}>
+    <Drawer anchor="bottom" open={open} onClose={onClose} PaperProps={{ sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}>
       <Box p={2} pb={4}>
         {/* Legg til egendefinert vare - Default åpen */}
         <Accordion elevation={0} defaultExpanded>

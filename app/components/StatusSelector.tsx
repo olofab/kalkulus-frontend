@@ -31,10 +31,12 @@ export default function StatusSelector({ offer, currentStatus, onUpdated }: {
         label="Status"
         onChange={handleChange}
       >
-        <MenuItem value="draft">Utkast</MenuItem>
-        <MenuItem value="sent">Sendt</MenuItem>
-        <MenuItem value="accepted">Akseptert</MenuItem>
-        <MenuItem value="rejected">Avslått</MenuItem>
+        <MenuItem value="DRAFT">Utkast</MenuItem>
+        <MenuItem value="PENDING">Sendt</MenuItem>
+        <MenuItem value="ACCEPTED">Akseptert</MenuItem>
+        <MenuItem value="REJECTED">Avslått</MenuItem>
+        <MenuItem value="EXPIRED">Utløpt</MenuItem>
+        <MenuItem value="COMPLETED">Fullført</MenuItem>
       </Select>
     </FormControl>
   )

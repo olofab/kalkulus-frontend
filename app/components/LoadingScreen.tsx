@@ -16,10 +16,10 @@ export default function LoadingScreen() {
       height="80dvh"
     >
       <Image
-        src="/loading.gif"
+        src="/loading2.gif"
         alt="Laster..."
-        width={80}
-        height={80}
+        width={200}
+        height={200}
         priority
       />
     </Box>

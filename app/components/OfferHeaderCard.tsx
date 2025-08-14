@@ -1,7 +1,6 @@
 'use client'
 import { Box, Typography, Chip, Stack, TextField } from '@mui/material'
-import PersonIcon from '@mui/icons-material/Person'
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter'
+import { User, Building } from 'lucide-react'
 import { useState } from 'react'
 
 export default function OfferHeaderCard({
@@ -33,7 +32,7 @@ export default function OfferHeaderCard({
         <Stack spacing={1}>
           {/* Prosjektnavn */}
           <Stack direction="row" alignItems="center" spacing={1}>
-            <BusinessCenterIcon fontSize="small" />
+            <Building size={16} />
             {editField === 'title' ? (
               <TextField
                 size="small"
@@ -51,7 +50,7 @@ export default function OfferHeaderCard({
 
           {/* Kunde */}
           <Stack direction="row" alignItems="center" spacing={1}>
-            <PersonIcon fontSize="small" />
+            <User size={16} />
             {editField === 'customer' ? (
               <TextField
                 size="small"
@@ -82,19 +81,23 @@ export default function OfferHeaderCard({
 
 export function getStatusColor(status: string): "success" | "warning" | "default" | "error" {
   switch (status) {
-    case 'accepted': return 'success'
-    case 'sent': return 'warning'
-    case 'rejected': return 'error'
+    case 'ACCEPTED': return 'success'
+    case 'PENDING': return 'warning'
+    case 'REJECTED': return 'error'
+    case 'EXPIRED': return 'warning'
+    case 'COMPLETED': return 'success'
     default: return 'default'
   }
 }
 
 export function getStatusTitle(status: string) {
   switch (status) {
-    case 'draft': return 'Utkast'
-    case 'accepted': return 'Akseptert'
-    case 'sent': return 'Sent'
-    case 'rejected': return 'Avslått'
+    case 'DRAFT': return 'Utkast'
+    case 'ACCEPTED': return 'Akseptert'
+    case 'PENDING': return 'Sendt'
+    case 'REJECTED': return 'Avslått'
+    case 'EXPIRED': return 'Utløpt'
+    case 'COMPLETED': return 'Fullført'
     default: return 'Ukjent'
   }
 }

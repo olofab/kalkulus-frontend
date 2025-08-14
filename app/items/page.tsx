@@ -80,15 +80,11 @@ export default function ItemsPage() {
           title="Ingen lagrede varer"
           description="Alle lagrede varer og kategorier vil vises her"
           imageSrc="/illustrations/empty-box.png"
-          actionLabel="Opprett ny vare tilbud"
-          onActionClick={() => setDrawerOpen(true)}
+
         />
         :
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h4" color={'primary'}>Vareliste</Typography>
-          <IconButton onClick={() => setDrawerOpen(true)}>
-            <Plus />
-          </IconButton>
         </Box>
       }
 
@@ -146,7 +142,7 @@ export default function ItemsPage() {
           createItem.mutate({
             name: form.name,
             unitPrice: parseFloat(form.unitPrice),
-            categoryIds: form.categoryIds
+            categoryId: form.categoryIds[0] // Assuming you want to use the first selected category
           })
           setDrawerOpen(false)
         }}
@@ -157,7 +153,7 @@ export default function ItemsPage() {
         anchor="bottom"
         open={!!editItem}
         onClose={() => setEditItem(null)}
-      >
+        PaperProps={{ sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}>
         {/* Header */}
         <Box display="flex" alignItems="center" px={3} py={2}>
           <Typography variant="h6" flexGrow={1}>
@@ -194,7 +190,8 @@ export default function ItemsPage() {
         anchor="bottom"
         open={!!itemToDelete}
         onClose={() => setItemToDelete(null)}
-      >
+        PaperProps={{ sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}>
+
         {/* Header */}
         <Box display="flex" alignItems="center" px={3} py={2}>
           <Typography variant="h6" flexGrow={1}>
@@ -220,6 +217,28 @@ export default function ItemsPage() {
           </Stack>
         </Box>
       </Drawer>
+      <Box
+        position="fixed"
+        bottom={48}
+        left="50%"
+        sx={{ transform: 'translateX(-50%)', zIndex: 1000 }}
+      >
+        <Button
+          onClick={() => setDrawerOpen(true)}
+          variant="contained"
+          color="primary"
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            minWidth: 0,
+            boxShadow: 4,
+            p: 0,
+          }}
+        >
+          <Plus size={24} />
+        </Button>
+      </Box>
     </Box >
   )
 }

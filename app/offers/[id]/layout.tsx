@@ -51,11 +51,7 @@ export default function OfferLayout({ children }: { children: ReactNode }) {
       </Container>
 
       {/* FAB Menu always visible */}
-      <OfferFAB
-        onOpenItems={() => setItemDrawerOpen(true)}
-        onOpenNotes={() => setNotesDrawerOpen(true)}
-        total={offer?.totalSum}
-      />
+
 
       {/* Drawers */}
       <AddItemDrawer

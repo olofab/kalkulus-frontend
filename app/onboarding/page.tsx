@@ -1,36 +1,44 @@
 'use client'
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import axios from 'axios'
-import { apiPut } from '../lib/api'
+
+import React, { useState } from 'react';
+import OnboardingScreen from './components/OnboardingPage';
+const onboardingPages = [
+  {
+    title: 'Welcome to App 6.0',
+    description: 'Enjoy a smart life at your fingertips.',
+    imageSrc: '/icons/offer.png',
+    gradient: 'linear-gradient(to bottom, #d3e6fb, #f5f8fd)',
+  },
+  {
+    title: 'Brand-new Experience of Smart Control',
+    description:
+      'Thanks to the new interaction design, each home member can personalize an exclusive home to suit habits. You are in control of your home.',
+    imageSrc: '/illustration2.jpeg',
+    gradient: 'linear-gradient(to bottom, #e8d5fa, #f8f2ff)',
+  },
+];
 
 export default function OnboardingPage() {
-  const router = useRouter()
-  const [form, setForm] = useState({
-    hourlyRate: '',
-    fuelRate: '',
-    machineRate: '',
-  })
+  const [index, setIndex] = useState(0);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+  const handleNext = () => {
+    if (index < onboardingPages.length - 1) {
+      setIndex((prev) => prev + 1);
+    }
+  };
 
-  const handleSubmit = async () => {
-    await apiPut('/api/company/configure', form)
-    router.push('/dashboard')
-  }
+  const handleBack = () => {
+    if (index > 0) {
+      setIndex((prev) => prev - 1);
+    }
+  };
 
   return (
-    <Box p={4}>
-      <Typography variant="h5" mb={2}>Konfigurer firma</Typography>
-      <Stack spacing={2}>
-        <TextField label="Timesats" name="hourlyRate" fullWidth onChange={handleChange} />
-        <TextField label="Maskinleie (per time)" name="machineRate" fullWidth onChange={handleChange} />
-        <TextField label="Drivstoffsats (per time)" name="fuelRate" fullWidth onChange={handleChange} />
-        <Button variant="contained" onClick={handleSubmit}>Fullfør onboarding</Button>
-      </Stack>
-    </Box>
-  )
+    <OnboardingScreen
+      pages={onboardingPages}
+      currentIndex={index}
+      onNext={handleNext}
+      onBack={handleBack}
+    />
+  );
 }

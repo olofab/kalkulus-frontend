@@ -4,56 +4,33 @@ import {
   InputAdornment, Skeleton,
   Grid,
   Alert,
-  Link
+  Link,
+  Card
 } from '@mui/material'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
-import AddIcon from '@mui/icons-material/Add'
-import SearchIcon from '@mui/icons-material/Search'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Offer } from '../types/offer'
 import { apiGet } from '../lib/api'
-import PersonIcon from '@mui/icons-material/Person';
+import { User, Bell, Search, Plus } from 'lucide-react'
 import { useAppContext } from '../lib/AppContext'
 import dayjs from 'dayjs'
 import SearchBarWithResults from './components/Search'
-import { ClipboardList, PackageSearch, FileSearch } from 'lucide-react'
+import { ClipboardList, PackageSearch, FileSearch, ArrowRight } from 'lucide-react'
+import { getStatusStyle } from '../offers/utils/StatusStyle'
+import Image from 'next/image'
+import NewOfferDrawer from '../offers/components/CreateOfferDrawer'
+import { off } from 'process'
 
 
 const STATUS_LABELS = {
   all: 'Alle',
-  draft: 'Utkast',
-  sent: 'Sendt',
-  accepted: 'Akseptert',
-  rejected: 'Avslått'
+  DRAFT: 'Utkast',
+  PENDING: 'Sendt',
+  ACCEPTED: 'Akseptert',
+  REJECTED: 'Avslått',
+  EXPIRED: 'Utløpt',
+  COMPLETED: 'Fullført'
 }
-
-const featureCards = [
-  {
-    title: 'Opprett prosjekt',
-    description: 'Lag et nytt tilbud for kunden din på få sekunder.',
-    color: '#E8ECF1',
-    icon: <ClipboardList size={32} color="#2C3E50" strokeWidth={2} />,
-    href: '/offers/new',
-
-  },
-  {
-    title: 'Vareliste',
-    description: 'Full oversikt over alle varer og tjenester du tilbyr.',
-    color: '#F5EFE6',
-    icon: <PackageSearch size={32} color="#2C3E50" strokeWidth={2} />,
-    href: '/items',
-
-  },
-  {
-    title: 'Finn prosjekt',
-    description: 'Se og rediger tidligere tilbud i systemet.',
-    color: '#EAEDED',
-    icon: <FileSearch size={32} color="#2C3E50" strokeWidth={2} />,
-    href: '/offers',
-  },
-]
-
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -63,7 +40,56 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const { user } = useAppContext()
   const [error, setError] = useState<string | null>(null)
+  const [offerDrawerOpen, setOfferDrawerOpen] = useState(false)
 
+
+  const featureCards = [
+    {
+      title: 'Opprett',
+      description: 'Lag et nytt tilbud',
+      color: 'background.paper',
+      icon: (
+        <Image
+          src="/icons/project.png"
+          alt="Opprett prosjekt"
+          width={48}
+          height={48}
+          style={{ objectFit: 'contain' }}
+        />
+      ),
+      onActionClick: () => setOfferDrawerOpen(true)
+    },
+    {
+      title: 'Vareliste',
+      description: 'Alle varer og tjenester',
+      color: 'background.paper',
+      icon: (
+        <Image
+          src="/icons/items.png"
+          alt="Vareliste"
+          width={48}
+          height={48}
+          style={{ objectFit: 'contain' }}
+        />
+      ),
+      onActionClick: () => router.push('/items')
+    },
+    {
+      title: 'Prosjekter',
+      description: 'Se og rediger tilbud',
+      color: 'background.paper',
+      icon: (
+        <Image
+          src="/icons/offers.png"
+          alt="Tilbud"
+          width={48}
+          height={48}
+          style={{ objectFit: 'contain' }}
+        />
+      ),
+      onActionClick: () => router.push('/offers')
+    }
+  ]
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -96,54 +122,138 @@ export default function DashboardPage() {
   if (true) {
     return (
       <Box p={3} pt={1}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-          <Typography variant="h4" fontWeight={700}>Dashboard</Typography>
-        </Stack>
         {error && (
           <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
             {error}
           </Alert>
         )}
-        <SearchBarWithResults />
-        <Grid container spacing={2}>
+
+        {/* Feature cards in a row */}
+        <Grid container spacing={1} mb={4}>
           {featureCards.map((card, index) => (
-            <Grid item xs={12} sm={6} key={index}>
-              <Link href={card.href} style={{ textDecoration: 'none' }}>
+            <Grid item xs={4} sm={4} key={index}>
 
-                <Box
-                  sx={{
-                    backgroundColor: card.color,
-                    borderRadius: 2,
-                    p: 2,
-                    boxShadow: 0,
-                    height: '100%',
-                  }}
-                >
-                  <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                        {card.title}
-                      </Typography>
-                    </Box>
-                    {card.icon}
-                  </Box>
+              <Box
+                onClick={card.onActionClick}
 
+                sx={{
+                  backgroundColor: card.color,
+                  borderRadius: 2,
+                  p: 1,
+                  pt: 2,
+                  boxShadow: 0,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                  textAlign: 'center',
+                }}
+              >
+                {card.icon}
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                    {card.title}
+                  </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {card.description}
                   </Typography>
-                  <Typography
-                    variant="caption"
-                    color="primary"
-                    sx={{ mt: 1, display: 'inline-block' }}
-                  >
-                    Klikk for å gå videre
-                  </Typography>
                 </Box>
-              </Link>
+              </Box>
             </Grid>
           ))}
         </Grid>
-      </Box >
+
+        <SearchBarWithResults />
+
+
+        {/* Latest offers list */}
+        {offers.length > 0 && (<Typography variant="h5" fontWeight={600} mb={2}>
+          Siste tilbud
+        </Typography>
+        )}
+
+        {offers.length === 0 && (
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={6}>
+            <Image
+              src="/icons/empty.png"
+              alt="Ingen tilbud"
+              width={60}
+              height={60}
+              style={{ opacity: 0.85, marginBottom: 16 }}
+            />
+            <Typography variant="h6" color="text.secondary" mb={1}>
+              Du har ingen tilbud ennå
+            </Typography>
+            <Typography variant="body2" color="text.secondary" align="center" mb={2}>
+              Opprett ditt første tilbud ved å klikke på "Opprett" knappen over.
+            </Typography>
+          </Box>
+        )}
+        <Stack spacing={1}>
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <Stack direction="row" spacing={2} key={i}>
+                {/* Square skeleton */}
+
+                <Skeleton variant="rounded" width={48} height={48} />
+                {/* Two longer skeletons under each other */}
+                <Stack spacing={0.5} flex={1} justifyContent="center">
+                  <Skeleton width="60%" height={24} />
+                  <Skeleton width="40%" height={20} />
+                </Stack>
+              </Stack>
+            ))
+          ) : (
+            [...offers]
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .slice(0, 10)
+              .map((offer) => (
+                <Card
+                  elevation={0}
+                  key={offer.id}
+                  onClick={() => router.push(`/offers/${offer.id}`)}
+                  sx={{
+                    p: 1,
+                    pl: 0,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: 'transparent',
+                    '&:hover': {
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                    },
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Avatar
+                      sx={{
+                        bgcolor: getStatusStyle(offer.status).color,
+                        color: 'primary.main',
+                        width: 48,
+                        height: 48,
+                      }}
+                      variant='rounded'
+                    >
+                      {getStatusStyle(offer.status).icon}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        {offer.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {offer.customer} {offer.address && ` | ${offer.address}`}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Card>
+              ))
+          )}
+        </Stack>
+        <NewOfferDrawer open={offerDrawerOpen} onClose={() => setOfferDrawerOpen(false)} />
+
+      </Box>
     )
   }
 
@@ -156,7 +266,7 @@ export default function DashboardPage() {
             sx={{ bgcolor: 'primary.main', cursor: 'pointer' }}
             onClick={() => router.push('/me')}
           >
-            <PersonIcon />
+            <User />
           </Avatar>
           <Box>
             <Typography variant="body2" color="text.secondary">Hello,</Typography>
@@ -164,7 +274,7 @@ export default function DashboardPage() {
           </Box>
         </Stack>
         <IconButton onClick={() => router.push('/notifications')}>
-          <NotificationsNoneIcon />
+          <Bell />
         </IconButton>
       </Stack>
 
@@ -184,7 +294,7 @@ export default function DashboardPage() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <Search />
               </InputAdornment>
             ),
             sx: {
@@ -210,7 +320,7 @@ export default function DashboardPage() {
             '&:hover': { bgcolor: 'primary.main' }
           }}
         >
-          <AddIcon />
+          <Plus />
         </IconButton>
       </Stack>
 

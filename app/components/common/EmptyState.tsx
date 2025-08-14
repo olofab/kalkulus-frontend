@@ -46,7 +46,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         </Typography>
       )}
       {actionLabel && onActionClick && (
-        <Button variant="contained" onClick={onActionClick}>
+        <Button variant="contained" onClick={onActionClick} sx={{ mt: 2 }}>
           {actionLabel}
         </Button>
       )}

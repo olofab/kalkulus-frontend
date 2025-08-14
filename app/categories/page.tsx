@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Box, Button, Container, TextField, Typography, List, ListItem, ListItemText, IconButton, Paper } from '@mui/material'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { Trash2 } from 'lucide-react'
 import { apiGet, apiPost, apiDelete } from '../lib/api'
 import { Category } from '../types/itemTemplates'
 
@@ -64,7 +64,7 @@ export default function CategoriesPage() {
               key={category.id}
               secondaryAction={
                 <IconButton edge="end" onClick={() => handleDelete(category.id)}>
-                  <DeleteIcon />
+                  <Trash2 />
                 </IconButton>
               }
             >

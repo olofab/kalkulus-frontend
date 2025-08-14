@@ -52,6 +52,7 @@ export const useItemTemplates = () => {
   return {
     groupedTemplates,
     categories,
+    templates, // All templates as flat array for search
     fetchTemplates,
     fetchCategories,
   }

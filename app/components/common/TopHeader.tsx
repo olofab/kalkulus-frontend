@@ -1,80 +1,147 @@
 'use client'
 
-import { AppBar, Toolbar, IconButton, Box, Avatar, Badge } from '@mui/material'
-import HouseSidingRoundedIcon from '@mui/icons-material/HouseSidingRounded'
-import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'
-import { usePathname, useRouter } from 'next/navigation'
-import { ArrowLeft, Bell, BellRing, ChevronLeft, Home } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { useParams, usePathname, useRouter } from 'next/navigation'
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Divider
+} from '@mui/material'
+import { ArrowLeft, MoreVertical, Home, Package, Receipt, User, Menu } from 'lucide-react'
+import { useOffer } from '../../offers/hooks/useOffer'
 
-type HeaderProps = {
-  userInitial?: string
-}
+const ROOT_ROUTES = ['/dashboard', '/items', '/offers', '/me', '/profile', '/']
+const BACK_ROUTES = ['/dashboard', '/']
 
-export default function TopHeader({ userInitial = '?' }: HeaderProps) {
-  const router = useRouter()
+export default function Header() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const params = useParams()
 
-  const showLogo = pathname === '/' || pathname === '/dashboard';
+  let offerId: string | undefined
+  if (pathname.startsWith('/offers/')) {
+    let id = params?.id || pathname.split('/')[2]
+    if (Array.isArray(id)) id = id[0]
+    offerId = id
+  }
+  // Always call the hook, but only pass id if present
+  const { offer, loading: offerLoading } = useOffer(offerId)
+
+  const offerTitle = offer?.title
+  const showBack = useMemo(() => !BACK_ROUTES.includes(pathname || ''), [pathname])
+
+  const title = useMemo(() => {
+    if (pathname.startsWith('/offers/')) {
+      const id = params?.id || pathname.split('/')[2]
+      if (offerLoading) return 'Laster...'
+      if (offerTitle) return offerTitle
+      if (id && !isNaN(Number(id))) return `Tilbud #${id}`
+      return 'Tilbud'
+    }
+    if (pathname.startsWith('/items')) return 'Vareliste'
+    if (pathname.startsWith('/offers')) return 'Alle tilbud'
+    if (pathname.startsWith('/me') || pathname.startsWith('/profile')) return 'Profil'
+    if (pathname.startsWith('/dashboard') || pathname === '/') return 'Dashboard'
+    return 'Timla'
+  }, [pathname, offerTitle, offerLoading, params])
+
+
+  const goBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back()
+    } else {
+      router.push('/dashboard')
+    }
+  }
+
+  const menu = [
+    { label: 'Dashboard', icon: <Home />, href: '/dashboard' },
+    { label: 'Vareliste', icon: <Package />, href: '/items' },
+    { label: 'Alle tilbud', icon: <Receipt />, href: '/offers' },
+    { label: 'Profil', icon: <User />, href: '/me' },
+  ]
+
   return (
-    <AppBar position="static" color="default" elevation={0}
-      sx={{
-        backgroundColor: 'transparent',
-        m: 0,
-        p: 3
-      }}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
+    <>
+      <AppBar
+        position="sticky"
+        elevation={0}
+        color="transparent"
+        sx={{
+          p: 2,
+          backgroundColor: theme => theme.palette.background.default
+
+        }}
       >
-        {/* Logo */}
-        <Box display="flex" alignItems="center" gap={1}>
-          {showLogo ? (
-            <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
-              <Image
-                src="/timla_logo_blue.svg"
-                alt="Timla logo"
-                width={30}
-                height={30}
-              />
-            </Link>
-          ) : (
-            <Box>
-              <IconButton onClick={() => router.back()}>
-                <ChevronLeft size={24} strokeWidth={2} />
-              </IconButton>
-              <IconButton onClick={() => router.push('/')}>
-                <Home size={24} strokeWidth={2} />
-              </IconButton>
-
-            </Box>
-
+        <Toolbar
+          sx={{
+            minHeight: 56,
+            px: 1.5,
+            gap: 1,
+            display: 'grid',
+            gridTemplateColumns: showBack ? 'auto 1fr auto' : '1fr auto',
+            alignItems: 'center'
+          }}
+        >
+          {showBack && (
+            <IconButton size="small" onClick={goBack} edge="start" aria-label="Tilbake">
+              <ArrowLeft size={18} />
+            </IconButton>
           )}
-        </Box>
 
-        {/* Right side: Notifications and Avatar */}
-        <Box display="flex" alignItems="center" gap={2}>
-          <IconButton>
-            <BellRing size={24} strokeWidth={2} />
+          <Typography
+            variant="h5"
+            noWrap
+            sx={{
+              fontWeight: 700,
+              justifySelf: showBack ? 'center' : 'start'
+            }}
+          >
+            {title}
+          </Typography>
+
+          <IconButton size="small" onClick={() => setOpen(true)} edge="end" aria-label="Mer">
+            <Menu />
           </IconButton>
-          <Link href="/me" style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar
-              sx={{
-                bgcolor: '#2C3E50',
-                color: 'white',
-                width: 30,
-                height: 30,
-                fontSize: '1rem',
-                fontWeight: 500,
+        </Toolbar>
+      </AppBar>
+
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={() => setOpen(false)}
+        PaperProps={{ sx: { width: 320 } }}
+      >
+        <Box sx={{ px: 2, py: 2 }}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Navigasjon
+          </Typography>
+        </Box>
+        <Divider />
+        <List>
+          {menu.map((m) => (
+            <ListItemButton
+              key={m.href}
+              onClick={() => {
+                setOpen(false)
+                router.push(m.href)
               }}
             >
-              {userInitial}
-            </Avatar>
-          </Link>
-        </Box>
-      </Box>
-    </AppBar>
+              <ListItemIcon>{m.icon}</ListItemIcon>
+              <ListItemText primary={m.label} />
+            </ListItemButton>
+          ))}
+        </List>
+      </Drawer>
+    </>
   )
 }

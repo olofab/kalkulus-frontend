@@ -47,9 +47,8 @@ export default function AddItemDrawer({ open, onClose, onAddItem }: Props) {
   }, [open])
 
   return (
-    <Drawer anchor="bottom" open={open} onClose={onClose} PaperProps={{ sx: { height: '80%' } }}>
+    <Drawer anchor="bottom" open={open} onClose={onClose} PaperProps={{ sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}>
       <Box p={2}>
-
         <Typography variant="h6" mb={1}>Dine notater</Typography>
         <Box display="flex" flexDirection="column" gap={2}>
           <TextField
@@ -61,7 +60,6 @@ export default function AddItemDrawer({ open, onClose, onAddItem }: Props) {
             onChange={(e) => setCustomPrice(e.target.value)}
             fullWidth
           />
-
         </Box>
       </Box>
     </Drawer>

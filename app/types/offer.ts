@@ -8,10 +8,12 @@ export type Item = {
 
 
 export enum OfferStatus {
-  Draft = "draft",
-  Sent = "sent",
-  Accepted = "accepted",
-  Rejected = "rejected",
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+  EXPIRED = "EXPIRED",
+  COMPLETED = "COMPLETED",
 }
 
 export type CreateOffer = {

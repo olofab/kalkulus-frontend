@@ -10,8 +10,7 @@ import {
 } from '@mui/material'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ErrorIcon from '@mui/icons-material/Error'
+import { CheckCircle, AlertCircle } from 'lucide-react'
 import { useAppContext } from '../../lib/AppContext'
 
 export default function RegisterResultPage() {
@@ -44,7 +43,7 @@ export default function RegisterResultPage() {
         <Stack spacing={3} alignItems="center">
           {isSuccess ? (
             <>
-              <Image src="/verified.svg" alt="Timla logo" width={250} height={250} />
+              <Image src="/icons/rocket.png" alt="Timla logo" width={90} height={90} />
               <Typography variant="h5" fontWeight={600}>Profilen er opprettet</Typography>
               <Typography variant="body2" textAlign={'center'} color="text.secondary">
                 Din bedriftsprofil er opprettet. Du kan nå begynne å bruke Timla!
@@ -55,7 +54,7 @@ export default function RegisterResultPage() {
             </>
           ) : (
             <>
-              <Image src="/denied.svg" alt="Timla logo" width={250} height={250} />
+              <Image src="/icons/robot.png" alt="Timla logo" width={80} height={80} />
               <Typography variant="h5" fontWeight={600}>Noe gikk galt</Typography>
               <Typography variant="body2" color="text.secondary">
                 Kunne ikke opprette profil. {errorMessage && <><br /><strong>Feilmelding:</strong> {errorMessage}</>}
