@@ -12,7 +12,7 @@ import {
   Paper
 } from '@mui/material'
 import { useOffer } from '../hooks/useOffer'
-import { ClipboardList, FileText, Trash2, Info, Download, RefreshCw } from 'lucide-react'
+import { ClipboardList, FileText, Trash2, Info, Download, RefreshCw, Clock } from 'lucide-react'
 import LoadingScreen from '../../components/LoadingScreen'
 import ActionCard from '../components/ActionCard'
 import HeaderCard from '../components/HeaderCard'
@@ -143,6 +143,35 @@ export default function OfferDetailsPage() {
                 <RefreshCw size={20} color={theme.palette.primary.dark} />
               </Box>
               <Typography fontWeight={500}>Oppdater tilbudets status</Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={2}
+              sx={{
+                cursor: 'pointer',
+                px: 2,
+                borderRadius: 2,
+                '&:hover': { background: '#f5f7fa' },
+              }}
+              onClick={() => router.push(`/history?offerId=${offer.id}`)}
+            >
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: theme => theme.palette.primary.light,
+                }}
+              >
+                <Clock size={20} color={theme.palette.primary.dark} />
+              </Box>
+              <Typography fontWeight={500}>Se historikk</Typography>
             </Box>
           </Grid>
           <Grid item xs={12}>

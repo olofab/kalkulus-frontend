@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios'
 import { Offer } from '../types/offer'
+import { OfferHistory } from '../types/history'
 import config from './config'
 
 // Environment configuration
@@ -184,4 +185,8 @@ export const deleteItem = async (itemId: number): Promise<void> => {
 
 export const updateOffer = async (id: number, data: Partial<Offer>) => {
   return await apiPut(`/api/offers/${id}`, data)
+}
+
+export const fetchOfferHistory = async (id: string | number): Promise<OfferHistory> => {
+  return await apiGet<OfferHistory>(`/api/offers/${id}/history`)
 }
