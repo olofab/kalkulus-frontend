@@ -7,7 +7,8 @@ export function middleware(request: NextRequest) {
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
   const isWelcomePage = request.nextUrl.pathname === '/welcome'
-  const isPublic = isAuthPage || isWelcomePage
+  const isTestPage = request.nextUrl.pathname === '/test'
+  const isPublic = isAuthPage || isWelcomePage || isTestPage
 
   if (!token) {
     // No token, redirect to welcome on first load (root or dashboard)
