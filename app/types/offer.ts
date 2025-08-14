@@ -6,6 +6,12 @@ export type Item = {
   quantity: number
 }
 
+export type ItemInput = {
+  name: string
+  unitPrice: number
+  quantity: number
+}
+
 
 export enum OfferStatus {
   DRAFT = "DRAFT",

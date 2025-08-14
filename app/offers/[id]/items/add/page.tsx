@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { apiPost } from '../../../../lib/api'
 import { useItemTemplatesStore } from '../../../../store/useItemTemplatesStore'
 import { Item } from '../../../../types/offer'
+import { ItemTemplate } from '../../../../types/itemTemplates'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import Image from 'next/image'
 
@@ -58,11 +59,11 @@ export default function AddTaskPage() {
     )
   }
 
-  const handleAddItem = async (item: Item) => {
+  const handleAddItem = async (template: ItemTemplate) => {
     try {
       await apiPost(`/api/offers/${id}/item`, {
-        name: item.name,
-        unitPrice: item.unitPrice,
+        name: template.name,
+        unitPrice: template.unitPrice,
         quantity: 1
       })
 

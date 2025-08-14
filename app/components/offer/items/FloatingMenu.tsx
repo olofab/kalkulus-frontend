@@ -2,14 +2,13 @@
 'use client'
 import { Box, Button, Paper, Typography } from '@mui/material'
 import { Item } from './ItemList'
-import { ExistingItem } from './AddItemDrawer'
 
 export default function FloatingActionMenu({
   totalPrice,
   onAddItem,
 }: {
   totalPrice: number
-  onAddItem: (item: ExistingItem & { quantity: number }) => void
+  onAddItem: (item: Item & { quantity: number }) => void
 }) {
   return (
     <Paper

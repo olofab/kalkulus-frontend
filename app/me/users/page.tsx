@@ -127,9 +127,7 @@ export default function AdminUsersPage() {
   )
 }
 
-
-
-export function getUserTypeChipProps(userType: string | UserTypeEnum): { label: string; severity: Severity } {
+function getUserTypeChipProps(userType: string | UserTypeEnum): { label: string; severity: Severity } {
   switch (userType) {
     case UserTypeEnum.INTERNAL:
       return {
