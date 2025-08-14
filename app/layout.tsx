@@ -17,29 +17,6 @@ import 'dayjs/locale/nb' // norsk
 dayjs.locale('nb')
 
 
-function AuthGate1({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAppContext()
-  const router = useRouter()
-  const pathname = usePathname()
-
-  useEffect(() => {
-    if (!loading) {
-      if (!user && pathname !== '/login' && pathname !== '/welcome' && pathname !== '/test') {
-        router.replace('/welcome')
-      }
-      if (user && pathname === '/') {
-        router.replace('/dashboard')
-      }
-    }
-  }, [loading, user, pathname])
-
-  if (loading) {
-    return <LoadingScreen />
-  }
-
-  return <>{children}</>
-}
-
 export default function RootLayout({ children }) {
   const [queryClient] = useState(() => new QueryClient())
 

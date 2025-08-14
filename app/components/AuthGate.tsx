@@ -13,6 +13,9 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
 
   useEffect(() => {
+    // Don't do any auth checks until AppContext loading is complete
+    if (loading) return
+
     const publicRoutes = ['/welcome', '/login', '/auth/register', '/test']
     const token = localStorage.getItem('token')
 
@@ -32,7 +35,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     } catch {
       router.replace('/login')
     }
-  }, [pathname, router])
+  }, [pathname, router, loading]) // Added loading as dependency
 
   if (loading) {
     return <LoadingScreen />
