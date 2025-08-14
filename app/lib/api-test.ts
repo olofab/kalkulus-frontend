@@ -12,7 +12,7 @@ export async function testApiConnection() {
 
   try {
     // Test with an API endpoint that likely has CORS configured
-    const response = await fetch(`${config.apiUrl}/api/offers`, {
+    const response = await fetch(`${config.apiUrl}/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export async function testApiConnection() {
  */
 export async function testAuthenticatedCall() {
   console.log('🔐 Testing API call through our API client...')
-  
+
   try {
     // Test a simple public endpoint first
     const offers = await apiPublicGet('/api/offers')
