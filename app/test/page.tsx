@@ -13,23 +13,23 @@ interface TestResult {
 }
 
 export default function TestPage() {
-  const [response, setResponse] = useState<string>('')
+  const [response, setResponse] = useState<string>('Click a button below to test API connectivity...')
   const [connectionTest, setConnectionTest] = useState<TestResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Test GET on component mount
-    const fetchData = async () => {
-      try {
-        const data = await apiGet('/api/company/me')
-        setResponse(JSON.stringify(data, null, 2))
-      } catch (err) {
-        setResponse(`Feil: ${err}`)
-      }
-    }
+  // Removed automatic API call to prevent redirect issues on page load
+  // Users can manually test API calls using the buttons below
 
-    fetchData()
-  }, [])
+  const handleCompanyMeTest = async () => {
+    setIsLoading(true)
+    try {
+      const data = await apiGet('/api/company/me')
+      setResponse(JSON.stringify(data, null, 2))
+    } catch (err) {
+      setResponse(`Error testing /api/company/me: ${err}`)
+    }
+    setIsLoading(false)
+  }
 
   const handleConnectionTest = async () => {
     setIsLoading(true)
@@ -108,6 +108,13 @@ export default function TestPage() {
         <CardContent>
           <Typography variant="h6" gutterBottom>🧪 API Tests</Typography>
           <Stack direction="row" spacing={2} mb={3}>
+            <Button
+              variant="outlined"
+              onClick={handleCompanyMeTest}
+              disabled={isLoading}
+            >
+              Test Company/Me
+            </Button>
             <Button
               variant="outlined"
               onClick={handlePost}
