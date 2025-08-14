@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Box, Typography, Button, Stack, Card, CardContent, Chip } from '@mui/material'
 import { apiGet, apiPost, apiPublicPost } from '../lib/api'
 import { runApiTests, testApiConnection } from '../lib/api-test'
+import { debugToken, testAuthenticatedEndpoint } from '../lib/debug'
 import config from '../lib/config'
 
 interface TestResult {
@@ -56,7 +57,18 @@ export default function TestPage() {
         password: 'hemmeligPass123'
       })
 
-      setResponse('Registrering vellykket')
+      console.log('🔍 Registration response:', res)
+      console.log('🔍 Response structure:', Object.keys(res))
+      console.log('🔍 Token in response:', res.token)
+      
+      if (res.token) {
+        localStorage.setItem('token', res.token)
+        console.log('✅ Token stored in localStorage')
+      } else {
+        console.log('❌ No token in response!')
+      }
+
+      setResponse(`Registrering vellykket. Token: ${res.token ? 'JA' : 'NEI'}`)
     } catch (err) {
       setResponse(`Feil ved registrering: ${err}`)
     }
@@ -128,6 +140,71 @@ export default function TestPage() {
               disabled={isLoading}
             >
               Run All Tests
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {/* Debug Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>🔍 Debug Tools</Typography>
+          <Stack direction="row" spacing={2} mb={2}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                const token = localStorage.getItem('token')
+                console.log('🔍 Current token:', token)
+                setResponse(`Current token: ${token || 'NONE'}`)
+              }}
+              disabled={isLoading}
+            >
+              Check Token
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                // Set a fake test token for testing purposes
+                const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+                localStorage.setItem('token', testToken)
+                console.log('✅ Test token set')
+                setResponse('Test token set in localStorage')
+              }}
+              disabled={isLoading}
+            >
+              Set Test Token
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                debugToken()
+                setResponse('Token debug info printed to console')
+              }}
+              disabled={isLoading}
+            >
+              Debug Token
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={async () => {
+                setIsLoading(true)
+                const response = await testAuthenticatedEndpoint()
+                setResponse(`Raw endpoint test - Status: ${response?.status || 'Failed'}`)
+                setIsLoading(false)
+              }}
+              disabled={isLoading}
+            >
+              Test /me Endpoint
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                localStorage.removeItem('token')
+                setResponse('Token cleared from localStorage')
+              }}
+              disabled={isLoading}
+            >
+              Clear Token
             </Button>
           </Stack>
         </CardContent>

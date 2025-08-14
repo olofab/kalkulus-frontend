@@ -22,9 +22,13 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
-    // Log requests in development
+    // Log requests in development with token info
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔗 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`)
+      console.log(`🔑 Token present: ${token ? 'YES' : 'NO'}`)
+      if (token) {
+        console.log(`🔑 Token preview: ${token.substring(0, 20)}...`)
+      }
     }
 
     return config
@@ -59,6 +63,9 @@ apiClient.interceptors.response.use(
       }
     } else if (error.response?.status === 403) {
       console.error('🚫 Access forbidden:', error.response.data)
+      console.error('🚫 Current token:', typeof window !== 'undefined' ? localStorage.getItem('token')?.substring(0, 20) + '...' : 'N/A')
+      console.error('🚫 Request URL:', error.config?.url)
+      console.error('🚫 Request headers:', error.config?.headers)
     } else if (error.response?.status >= 500) {
       console.error('🔥 Server error:', error.response.data)
     } else if (error.code === 'ECONNABORTED') {
