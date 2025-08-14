@@ -14,11 +14,9 @@ import {
   Select,
   SelectChangeEvent
 } from '@mui/material'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import DeleteIcon from '@mui/icons-material/Delete'
-import SyncIcon from '@mui/icons-material/Sync'
+import { FileText, Trash2, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
-import { Offer, OfferStatus } from '../types/offer'
+import { Offer } from '../types/offer'
 
 export default function OfferActions({
   offer,
@@ -32,7 +30,7 @@ export default function OfferActions({
   onStatusUpdated: () => void
 }) {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [newStatus, setNewStatus] = useState<OfferStatus>(offer.status)
+  const [newStatus, setNewStatus] = useState<string>(offer.status)
 
   const handleChangeStatus = async () => {
     await fetch(`/api/offers/${offer.id}`, {
@@ -46,17 +44,17 @@ export default function OfferActions({
 
   const actions = [
     {
-      icon: <PictureAsPdfIcon fontSize="large" />,
+      icon: <FileText size={24} />,
       label: 'Last ned',
       onClick: onDownload,
     },
     {
-      icon: <SyncIcon fontSize="large" />,
+      icon: <RotateCcw size={24} />,
       label: 'Status',
       onClick: () => setDialogOpen(true),
     },
     {
-      icon: <DeleteIcon fontSize="large" />,
+      icon: <Trash2 size={24} />,
       label: 'Slett',
       onClick: () => onDelete(offer.id),
     },
@@ -106,12 +104,14 @@ export default function OfferActions({
             <Select
               value={newStatus}
               label="Status"
-              onChange={(e: SelectChangeEvent<OfferStatus>) => setNewStatus(e.target.value as OfferStatus)}
+              onChange={(e: SelectChangeEvent<string>) => setNewStatus(e.target.value)}
             >
-              <MenuItem value="draft">Utkast</MenuItem>
-              <MenuItem value="sent">Sendt</MenuItem>
-              <MenuItem value="accepted">Akseptert</MenuItem>
-              <MenuItem value="rejected">Avslått</MenuItem>
+              <MenuItem value="DRAFT">Utkast</MenuItem>
+              <MenuItem value="PENDING">Sendt</MenuItem>
+              <MenuItem value="ACCEPTED">Akseptert</MenuItem>
+              <MenuItem value="REJECTED">Avslått</MenuItem>
+              <MenuItem value="EXPIRED">Utløpt</MenuItem>
+              <MenuItem value="COMPLETED">Fullført</MenuItem>
             </Select>
           </FormControl>
         </DialogContent>

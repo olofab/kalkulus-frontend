@@ -3,35 +3,98 @@ import { createTheme } from '@mui/material/styles'
 
 const theme = createTheme({
   palette: {
+    mode: 'light',
     primary: {
-      main: '#115d5a',
-      dark: '#0d4543',
-      light: '#4a8e8b',
+      main: '#2C3E50', // dyp stålblå
+      contrastText: '#ffffff',
+      light: '#E8ECF1'
     },
     secondary: {
-      main: '#f9a826',
-      dark: '#c07e1a',
-      light: '#ffd48a',
+      main: '#E67E22', // bygg-oransje
+      contrastText: '#ffffff',
     },
     background: {
-      default: '#f5f6f7',
-      paper: '#ffffff',
+      default: '#F7F9F9', // lys bakgrunn
+      paper: '#FFF',
+    },
+    info: {
+      main: '#1E6A8E', // havblå
+    },
+    success: {
+      main: '#4CAF50',
+    },
+    warning: {
+      main: '#F39C12',
+    },
+    error: {
+      main: '#C0392B',
     },
     text: {
-      primary: '#1a1a1a',
-      secondary: '#4f5b62',
-      disabled: '#9e9e9e',
+      primary: '#1B2733', // mørk tekst
+      secondary: '#2C3E50',
     },
-    error: { main: '#e74c3c' },
-    success: { main: '#27ae60' },
-    warning: { main: '#f39c12' },
-    info: { main: '#3498db' },
+    grey: {
+      100: '#A3C6C4', // sjøgrønn støtte
+      900: '#1B2733',
+    },
   },
   typography: {
-    fontFamily: 'Funnel Display, sans-serif',
-    fontSize: 14,
-    h5: { fontWeight: 600 },
-    button: { textTransform: 'none', fontWeight: 600 },
+    fontFamily: 'Work Sans, sans-serif',
+    h1: {
+      fontFamily: 'Funnel Display, sans-serif',
+      fontSize: '2.5rem',
+      fontWeight: 700,
+    },
+    h2: {
+      fontFamily: 'Funnel Display, sans-serif',
+      fontSize: '2rem',
+      fontWeight: 700,
+    },
+    h3: {
+      fontFamily: 'Funnel Display, sans-serif',
+      fontSize: '1.75rem',
+      fontWeight: 700,
+    },
+    h4: {
+      fontFamily: 'Funnel Display, sans-serif',
+      fontSize: '1.5rem',
+      fontWeight: 600,
+    },
+    h5: {
+      fontFamily: 'Funnel Display, sans-serif',
+      fontSize: '1.25rem',
+      fontWeight: 600,
+    },
+    h6: {
+      fontFamily: 'Funnel Display, sans-serif',
+      fontSize: '1rem',
+      fontWeight: 600,
+    },
+    subtitle1: {
+      fontFamily: 'Work Sans, sans-serif',
+      fontSize: '1rem',
+      fontWeight: 400,
+    },
+    subtitle2: {
+      fontFamily: 'Work Sans, sans-serif',
+      fontSize: '0.875rem',
+      fontWeight: 500,
+    },
+    body1: {
+      fontFamily: 'Work Sans, sans-serif',
+      fontSize: '1rem',
+      fontWeight: 400,
+    },
+    body2: {
+      fontFamily: 'Work Sans, sans-serif',
+      fontSize: '0.875rem',
+      fontWeight: 400,
+    },
+    button: {
+      fontFamily: 'Work Sans, sans-serif',
+      textTransform: 'none',
+      fontWeight: 600,
+    },
   },
   shape: {
     borderRadius: 8

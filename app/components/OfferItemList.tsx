@@ -6,7 +6,7 @@ import {
   Button, Box
 } from '@mui/material'
 import { useState } from 'react'
-import CategoryIcon from '@mui/icons-material/Category'
+import { Folder } from 'lucide-react'
 import axios from 'axios'
 import { Item } from '../types/offer'
 
@@ -61,7 +61,7 @@ export default function OfferItemList({ items, onUpdated }: {
                 variant="square"
                 sx={{ width: 50, height: 50, bgcolor: '#f3f3f3' }}
               >
-                <CategoryIcon fontSize="small" color="secondary" />
+                <Folder size={16} color="gray" />
               </Avatar>
             </ListItemAvatar>
             <ListItemText

@@ -1,13 +1,19 @@
+// app/offers/new/page.tsx
 'use client'
+
 import {
-  Box, TextField, Typography, Button, Stack, Stepper, Step, StepLabel, IconButton
+  Box, TextField, Typography, Button, Stack, Stepper, Step, StepLabel, IconButton,
+  useTheme
 } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
+import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import axios from 'axios'
-import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
+import dayjs from 'dayjs'
+import CustomizedSteppers from '../../components/Stepper'
+import Image from 'next/image'
+import { useCreateOffer } from '../hooks/useCreateOffer'
+import { ClipboardList, PackagePlus } from 'lucide-react'
 
 const steps = ['Prosjektinfo', 'Kundedetaljer', 'Beskrivelse']
 
@@ -21,25 +27,29 @@ const variants = {
 export default function NewOfferForm() {
   const router = useRouter()
   const [step, setStep] = useState(0)
+  const theme = useTheme();
 
   const [form, setForm] = useState({
-    customer: '',
     title: '',
+    customer: '',
     contactPerson: '',
     phone: '',
     email: '',
     address: '',
     description: '',
     validUntil: dayjs().add(30, 'day').format('YYYY-MM-DD'),
-    status: 'draft',
+    includeVat: true,
+    status: 'DRAFT'
   })
+
+  const createOffer = useCreateOffer()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
   const nextStep = () => {
-    if (step === 0 && (!form.customer.trim() || !form.title.trim())) return
+    if (step === 0 && (!form.title.trim() || !form.customer.trim())) return
     setStep((prev) => prev + 1)
   }
 
@@ -47,32 +57,49 @@ export default function NewOfferForm() {
   const skipStep = () => setStep((prev) => prev + 1)
 
   const handleSubmit = async () => {
-    const res = await axios.post('/api/offers', form)
-    router.push(`/offers/${res.data.id}`)
+    createOffer.mutate(form, {
+      onSuccess: (data) => {
+        router.push(`/offers/${data.id}`)
+      },
+      onError: (err) => {
+        console.error('Feil ved opprettelse av tilbud', err)
+      }
+    })
   }
 
   const isStepValid = () => {
     if (step === 0) {
-      return form.customer.trim() !== '' && form.title.trim() !== ''
+      return form.title.trim() !== '' && form.customer.trim() !== ''
     }
     return true
   }
 
   return (
-    <Box p={4}>
+    <Box p={3}>
+      <Box display="flex" justifyContent="center" mb={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            width: 100,
+            height: 100,
+            bgcolor: theme.palette.primary.light,
+            mb: 2,
+          }}
+        >
+          <PackagePlus size={40} color={theme.palette.primary.main} strokeWidth={2} />
+        </Box>
+      </Box>
+
       {step > 0 && (
         <IconButton onClick={prevStep} sx={{ mb: 2 }}>
-          <ArrowBack />
+          <ArrowLeft />
         </IconButton>
       )}
 
-      <Stepper activeStep={step} alternativeLabel sx={{ mb: 4 }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+      <CustomizedSteppers steps={steps} active={step} />
 
       <Typography variant="h5" mb={2}>{steps[step]}</Typography>
 
@@ -88,23 +115,45 @@ export default function NewOfferForm() {
           <Stack spacing={2}>
             {step === 0 && (
               <>
-                <TextField label="Kundenavn" name="customer" required fullWidth onChange={handleChange} />
-                <TextField label="Prosjekttittel" name="title" required fullWidth onChange={handleChange} />
+                <TextField
+                  label="Prosjekttittel"
+                  name="title"
+                  required
+                  fullWidth
+                  value={form.title}
+                  onChange={handleChange}
+                />
+                <TextField
+                  label="Kundenavn"
+                  name="customer"
+                  required
+                  fullWidth
+                  value={form.customer}
+                  onChange={handleChange}
+                />
               </>
             )}
 
             {step === 1 && (
               <>
-                <TextField label="Kontaktperson" name="contactPerson" fullWidth onChange={handleChange} />
-                <TextField label="Telefon" name="phone" fullWidth onChange={handleChange} />
-                <TextField label="E-post" name="email" fullWidth onChange={handleChange} />
-                <TextField label="Adresse" name="address" fullWidth onChange={handleChange} />
+                <TextField label="Kontaktperson" name="contactPerson" fullWidth value={form.contactPerson} onChange={handleChange} />
+                <TextField label="Telefon" name="phone" fullWidth value={form.phone} onChange={handleChange} />
+                <TextField label="E-post" name="email" fullWidth value={form.email} onChange={handleChange} />
+                <TextField label="Adresse" name="address" fullWidth value={form.address} onChange={handleChange} />
               </>
             )}
 
             {step === 2 && (
               <>
-                <TextField label="Beskrivelse (valgfritt)" name="description" multiline rows={3} fullWidth onChange={handleChange} />
+                <TextField
+                  label="Beskrivelse (valgfritt)"
+                  name="description"
+                  multiline
+                  rows={3}
+                  fullWidth
+                  value={form.description}
+                  onChange={handleChange}
+                />
                 <TextField
                   label="Gyldig til"
                   name="validUntil"
@@ -118,39 +167,36 @@ export default function NewOfferForm() {
             )}
           </Stack>
 
-
           <Stack direction="row" spacing={2} mt={4}>
-            {step === 0 && (
-              <Stack spacing={2} mt={4} width={'100%'}>
+            {step < steps.length - 1 && (
+              <Stack spacing={2} width="100%">
                 <Button
                   variant="contained"
+                  fullWidth
                   onClick={nextStep}
                   disabled={!isStepValid()}
-                  fullWidth
                 >
                   Neste
                 </Button>
+                {step > 0 && (
+                  <Button variant="text" onClick={skipStep} fullWidth>
+                    Hopp over
+                  </Button>
+                )}
+              </Stack>
+            )}
 
+            {step === steps.length - 1 && (
+              <Box display={'flex'} width={'100%'}>
                 <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => router.push('/dashboard')}
+                  variant="contained"
+                  onClick={handleSubmit}
                   fullWidth
+                  disabled={createOffer.isPending}
                 >
-                  Avbryt
+                  {createOffer.isPending ? 'Lagrer...' : 'Opprett prosjekt'}
                 </Button>
-              </Stack>
-            )}
-
-            {step === 1 && (
-              <Stack spacing={2} mt={4} width={'100%'}>
-                <Button variant="contained" onClick={nextStep} fullWidth>Neste</Button>
-                <Button variant="text" onClick={skipStep} fullWidth>Hopp over</Button>
-              </Stack>
-            )}
-
-            {step === 2 && (
-              <Button variant="contained" onClick={handleSubmit}>Opprett tilbud</Button>
+              </Box>
             )}
           </Stack>
         </motion.div>

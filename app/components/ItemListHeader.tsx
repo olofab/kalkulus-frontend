@@ -3,11 +3,9 @@
 import {
   Box, TextField, IconButton, Collapse, Stack, Button, InputAdornment
 } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import SearchIcon from '@mui/icons-material/Search'
+import { Plus, Search, ChevronUp } from 'lucide-react'
 import { useState } from 'react'
 import axios from 'axios'
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 
 export default function ItemListHeader({ onCreated, onSearch }: {
   onCreated: () => void,
@@ -36,7 +34,7 @@ export default function ItemListHeader({ onCreated, onSearch }: {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <Search />
               </InputAdornment>
             ),
             sx: {
@@ -62,7 +60,7 @@ export default function ItemListHeader({ onCreated, onSearch }: {
             '&:hover': { bgcolor: 'primary.dark' }
           }}
         >
-          {expanded ? <KeyboardArrowUpIcon /> : <AddIcon />}
+          {expanded ? <ChevronUp /> : <Plus />}
         </IconButton>
       </Stack>
 

@@ -1,7 +1,7 @@
 'use client'
 
-import { Box, Typography } from '@mui/material'
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
+import { Box, Typography, List, ListItem, ListItemText, Divider } from '@mui/material'
+import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { IconButton } from '@mui/material'
 import BackButton from '../components/BackButton'
