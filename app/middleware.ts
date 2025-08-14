@@ -3,12 +3,16 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
+  // Always allow access to test page without any checks
+  if (request.nextUrl.pathname === '/test') {
+    return NextResponse.next()
+  }
+
   const token = request.cookies.get('token')?.value
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
   const isWelcomePage = request.nextUrl.pathname === '/welcome'
-  const isTestPage = request.nextUrl.pathname === '/test'
-  const isPublic = isAuthPage || isWelcomePage || isTestPage
+  const isPublic = isAuthPage || isWelcomePage
 
   if (!token) {
     // No token, redirect to welcome on first load (root or dashboard)
