@@ -24,7 +24,7 @@ function AuthGate1({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading) {
-      if (!user && pathname !== '/login' && pathname !== '/welcome') {
+      if (!user && pathname !== '/login' && pathname !== '/welcome' && pathname !== '/test') {
         router.replace('/welcome')
       }
       if (user && pathname === '/') {

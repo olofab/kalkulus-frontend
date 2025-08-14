@@ -13,7 +13,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
 
   useEffect(() => {
-    const publicRoutes = ['/welcome', '/login', '/auth/register']
+    const publicRoutes = ['/welcome', '/login', '/auth/register', '/test']
     const token = localStorage.getItem('token')
 
     if (!token) {
