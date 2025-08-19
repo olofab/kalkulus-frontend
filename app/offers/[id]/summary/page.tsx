@@ -9,9 +9,6 @@ import { useState } from 'react'
 import { apiPut } from '../../../lib/api'
 import Image from 'next/image'
 import { OfferStatus } from '../../../types/offer' // Import the enum
-import { useState, useEffect } from 'react'
-import { apiPut } from '../../../lib/api'
-import Image from 'next/image'
 
 // Row skal være utenfor OfferSummaryPage
 function Row({ label, value, bold = false }: { label: string; value: string | number; bold?: boolean }) {
