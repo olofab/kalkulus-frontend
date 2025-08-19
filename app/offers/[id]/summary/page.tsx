@@ -5,6 +5,10 @@ import { useParams, useRouter } from 'next/navigation'
 import { useOffer } from '../../hooks/useOffer'
 import { useOfferItems } from '../../hooks/useOfferItems'
 import { FileText, Send, X } from 'lucide-react'
+import { useState } from 'react'
+import { apiPut } from '../../../lib/api'
+import Image from 'next/image'
+import { OfferStatus } from '../../../types/offer' // Import the enum
 import { useState, useEffect } from 'react'
 import { apiPut } from '../../../lib/api'
 import Image from 'next/image'
@@ -265,7 +269,7 @@ export default function OfferSummaryPage() {
                   try {
                     // TODO: Sett inn riktig domene/endpoint for e-postutsending
                     await apiPut(`/api/offers/${id}/send-pdf`, { email });
-                    await apiPut(`/api/offers/${id}/status`, { status: 'Estimat sendt' });
+                    await apiPut(`/api/offers/${id}/status`, { status: 'PENDING' }); // Use valid enum value
                     setSuccess(true);
                     setConfirmDrawerOpen(false);
                   } catch (err: any) {
