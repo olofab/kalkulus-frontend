@@ -7,6 +7,7 @@ import { useOfferItems } from '../../hooks/useOfferItems';
 import { useItemTemplates } from '../../hooks/useItemTemplates';
 import { CirclePlus, Search, X, MoreVertical, Edit, Trash } from 'lucide-react';
 import { useCreateItem, useUpdateOfferItem, useDeleteOfferItem, useAddTemplateToOffer } from '../../../items/hooks/useItems'
+import { QuantityDrawer, CustomItemDrawer, AddToListDrawer } from './Drawers';
 
 
 export default function OfferItemsPage() {
@@ -441,45 +442,26 @@ export default function OfferItemsPage() {
         </Box>
       </Drawer>
 
-      {/* Drawer: Step 2 - numpad for antall */}
-      <Drawer anchor="bottom" open={customQuantityDrawerOpen} onClose={() => setCustomQuantityDrawerOpen(false)} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
-        <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-          <Typography variant="h6">Antall</Typography>
-          <Typography variant="h4">{customQuantity || '0'}</Typography>
-          <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2} width="100%">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-              <Button key={n} onClick={() => handleCustomQuantityPad(n.toString())}>{n}</Button>
-            ))}
-            <Button onClick={() => handleCustomQuantityPad('del')}>Slett</Button>
-            <Button onClick={() => handleCustomQuantityPad('0')}>0</Button>
-            <Button variant="contained" onClick={() => handleCustomQuantityPad('ok')} disabled={!customQuantity || Number(customQuantity) < 1}>OK</Button>
-          </Box>
-        </Box>
-      </Drawer>
+      {/* Custom item quantity drawer */}
+      <QuantityDrawer
+        open={customQuantityDrawerOpen}
+        onClose={() => setCustomQuantityDrawerOpen(false)}
+        quantity={customQuantity}
+        onPad={handleCustomQuantityPad}
+        itemInfo={{ name: customName, price: Number(customPrice) }}
+      />
 
-      {/* Drawer: Template quantity selector */}
-      <Drawer anchor="bottom" open={templateQuantityDrawerOpen} onClose={() => setTemplateQuantityDrawerOpen(false)} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
-        <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-          {selectedTemplate && (
-            <Box textAlign="center" mb={1}>
-              <Typography variant="h6">{selectedTemplate.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {selectedTemplate.unitPrice.toLocaleString('no-NO')} kr per stk
-              </Typography>
-            </Box>
-          )}
-          <Typography variant="h6">Antall</Typography>
-          <Typography variant="h4">{templateQuantity || '0'}</Typography>
-          <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2} width="100%">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-              <Button key={n} onClick={() => handleTemplateQuantityPad(n.toString())}>{n}</Button>
-            ))}
-            <Button onClick={() => handleTemplateQuantityPad('del')}>Slett</Button>
-            <Button onClick={() => handleTemplateQuantityPad('0')}>0</Button>
-            <Button variant="contained" onClick={() => handleTemplateQuantityPad('ok')} disabled={!templateQuantity || Number(templateQuantity) < 1}>OK</Button>
-          </Box>
-        </Box>
-      </Drawer>
+      {/* Template quantity drawer */}
+      <QuantityDrawer
+        open={templateQuantityDrawerOpen}
+        onClose={() => setTemplateQuantityDrawerOpen(false)}
+        quantity={templateQuantity}
+        onPad={handleTemplateQuantityPad}
+        itemInfo={selectedTemplate && { 
+          name: selectedTemplate.name, 
+          price: selectedTemplate.unitPrice 
+        }}
+      />
 
       {/* Drawer: Step 3 - vareliste og kategori */}
       <Drawer anchor="bottom" open={showAddToListDrawer} onClose={() => setShowAddToListDrawer(false)} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
@@ -541,22 +523,15 @@ export default function OfferItemsPage() {
         </MenuItem>
       </Menu>
 
-      {/* Drawer: Edit quantity */}
-      <Drawer anchor="bottom" open={editQuantityDrawerOpen} onClose={() => setEditQuantityDrawerOpen(false)} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
-        <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-          <Typography variant="h6">Endre antall</Typography>
-          <Typography variant="body1" color="text.secondary">{editingItem?.name}</Typography>
-          <Typography variant="h4">{editQuantity || '0'}</Typography>
-          <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2} width="100%">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-              <Button key={n} onClick={() => handleEditQuantityPad(n.toString())}>{n}</Button>
-            ))}
-            <Button onClick={() => handleEditQuantityPad('del')}>Slett</Button>
-            <Button onClick={() => handleEditQuantityPad('0')}>0</Button>
-            <Button variant="contained" onClick={() => handleEditQuantityPad('ok')} disabled={!editQuantity || Number(editQuantity) < 1}>OK</Button>
-          </Box>
-        </Box>
-      </Drawer>
+      {/* Edit quantity drawer */}
+      <QuantityDrawer
+        open={editQuantityDrawerOpen}
+        onClose={() => setEditQuantityDrawerOpen(false)}
+        quantity={editQuantity}
+        onPad={handleEditQuantityPad}
+        title="Endre antall"
+        itemInfo={editingItem && { name: editingItem.name }}
+      />
     </Container>
   );
 }

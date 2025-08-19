@@ -14,11 +14,30 @@ export function CustomItemDrawer({ open, onClose, name, price, onNameChange, onP
   );
 }
 
-export function QuantityDrawer({ open, onClose, quantity, onPad }) {
+export function QuantityDrawer({ open, onClose, quantity, onPad, title = "Antall", subtitle, itemInfo }: {
+  open: boolean;
+  onClose: () => void;
+  quantity: string;
+  onPad: (value: string) => void;
+  title?: string;
+  subtitle?: string;
+  itemInfo?: { name: string; price?: number };
+}) {
   return (
     <Drawer anchor="bottom" open={open} onClose={onClose} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center">
-        <Typography variant="h6">Antall</Typography>
+        {itemInfo && (
+          <Box textAlign="center" mb={1}>
+            <Typography variant="h6">{itemInfo.name}</Typography>
+            {itemInfo.price && (
+              <Typography variant="body2" color="text.secondary">
+                {itemInfo.price.toLocaleString('no-NO')} kr per stk
+              </Typography>
+            )}
+          </Box>
+        )}
+        <Typography variant="h6">{title}</Typography>
+        {subtitle && <Typography variant="body2" color="text.secondary">{subtitle}</Typography>}
         <Typography variant="h4">{quantity || '0'}</Typography>
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2} width="100%">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
