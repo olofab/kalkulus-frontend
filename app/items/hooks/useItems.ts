@@ -68,9 +68,10 @@ export const useUpdateOfferItem = () => {
         return await apiPut(`/api/offers/${offerId}/item/${itemId}`, data);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, { offerId }) => {
       queryClient.invalidateQueries({ queryKey: ['offer-items'] })
       queryClient.invalidateQueries({ queryKey: ['offers'] })
+      queryClient.invalidateQueries({ queryKey: ['offer', parseInt(offerId)] })
     },
   })
 }
@@ -80,9 +81,10 @@ export const useDeleteOfferItem = () => {
   return useMutation({
     mutationFn: ({ offerId, itemId }: { offerId: string, itemId: number }) =>
       apiDelete(`/api/offers/${offerId}/items/${itemId}`),
-    onSuccess: () => {
+    onSuccess: (_, { offerId }) => {
       queryClient.invalidateQueries({ queryKey: ['offer-items'] })
       queryClient.invalidateQueries({ queryKey: ['offers'] })
+      queryClient.invalidateQueries({ queryKey: ['offer', parseInt(offerId)] })
     },
   })
 }
@@ -92,9 +94,42 @@ export const useAddTemplateToOffer = () => {
   return useMutation({
     mutationFn: ({ offerId, templateId, quantity = 1 }: { offerId: string, templateId: number, quantity?: number }) =>
       apiPost(`/api/offers/${offerId}/item/template`, { templateId, quantity }),
-    onSuccess: () => {
+    onSuccess: (_, { offerId }) => {
       queryClient.invalidateQueries({ queryKey: ['offer-items'] })
       queryClient.invalidateQueries({ queryKey: ['offers'] })
+      queryClient.invalidateQueries({ queryKey: ['offer', parseInt(offerId)] })
+    },
+  })
+}
+
+export const useAddCustomItemToOffer = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ offerId, name, unitPrice, quantity, categoryId }: {
+      offerId: string,
+      name: string,
+      unitPrice: number,
+      quantity: number,
+      categoryId?: number | null
+    }) =>
+      apiPost(`/api/offers/${offerId}/item/custom`, { name, unitPrice, quantity, categoryId }),
+    onSuccess: (_, { offerId }) => {
+      queryClient.invalidateQueries({ queryKey: ['offer-items'] })
+      queryClient.invalidateQueries({ queryKey: ['offers'] })
+      queryClient.invalidateQueries({ queryKey: ['offer', parseInt(offerId)] })
+    },
+  })
+}
+
+export const useAddItemToOffer = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ offerId, item }: { offerId: string, item: any }) =>
+      apiPost(`/api/offers/${offerId}/item`, item),
+    onSuccess: (_, { offerId }) => {
+      queryClient.invalidateQueries({ queryKey: ['offer-items'] })
+      queryClient.invalidateQueries({ queryKey: ['offers'] })
+      queryClient.invalidateQueries({ queryKey: ['offer', parseInt(offerId)] })
     },
   })
 }

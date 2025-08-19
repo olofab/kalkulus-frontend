@@ -11,9 +11,9 @@ import AddNotesDrawer from '../../components/offer/items/AddNotesDrawer'
 import FloatingActionMenu from '../../components/offer/items/FloatingMenu'
 import OfferFAB from '../../components/TotalSumFAB'
 import { AddItem, Item } from '../../components/offer/items/ItemList'
-import { apiPost } from '../../lib/api'
 import { useOffer } from '../hooks/useOffer'
 import { useItemRefetchStore } from '../../lib/hooks/useItemRefetchStore'
+import { useAddItemToOffer } from '../../items/hooks/useItems'
 
 export default function OfferLayout({ children }: { children: ReactNode }) {
   const { id } = useParams()
@@ -24,7 +24,7 @@ export default function OfferLayout({ children }: { children: ReactNode }) {
 
   const { offer, refetch: refetchOffer } = useOffer(offerId)
   const { trigger } = useItemRefetchStore()
-
+  const addItemToOfferMutation = useAddItemToOffer()
 
   useEffect(() => {
     refetchOffer()
@@ -32,7 +32,10 @@ export default function OfferLayout({ children }: { children: ReactNode }) {
 
   const handleAddItem = async (item: AddItem) => {
     try {
-      await apiPost(`/api/offers/${offerId}/item`, item)
+      await addItemToOfferMutation.mutateAsync({
+        offerId: offerId.toString(),
+        item
+      })
       useItemRefetchStore.getState().refetch() // trigger global refetch
       setItemDrawerOpen(false)
     } catch (error) {

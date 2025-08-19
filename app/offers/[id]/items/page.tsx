@@ -6,7 +6,7 @@ import { apiPost, apiPut } from '../../../lib/api';
 import { useOfferItems } from '../../hooks/useOfferItems';
 import { useItemTemplates } from '../../hooks/useItemTemplates';
 import { CirclePlus, Search, X, MoreVertical, Edit, Trash } from 'lucide-react';
-import { useCreateItem, useUpdateOfferItem, useDeleteOfferItem, useAddTemplateToOffer } from '../../../items/hooks/useItems'
+import { useCreateItem, useUpdateOfferItem, useDeleteOfferItem, useAddTemplateToOffer, useAddCustomItemToOffer } from '../../../items/hooks/useItems'
 import { QuantityDrawer, CustomItemDrawer, AddToListDrawer } from './Drawers';
 
 
@@ -46,6 +46,7 @@ export default function OfferItemsPage() {
   const updateOfferItemMutation = useUpdateOfferItem()
   const deleteOfferItemMutation = useDeleteOfferItem()
   const addTemplateToOfferMutation = useAddTemplateToOffer()
+  const addCustomItemToOfferMutation = useAddCustomItemToOffer()
 
   // Edit item states
   const [editingItem, setEditingItem] = useState<any>(null)
@@ -84,7 +85,8 @@ export default function OfferItemsPage() {
   const handleAddCustomItem = async () => {
     if (!customName || !customPrice || !customQuantity || Number(customQuantity) < 1) return;
     try {
-      const res = await apiPost(`/api/offers/${id}/item/custom`, {
+      const res = await addCustomItemToOfferMutation.mutateAsync({
+        offerId: id as string,
         name: customName,
         unitPrice: Number(customPrice),
         quantity: Number(customQuantity),
@@ -251,7 +253,7 @@ export default function OfferItemsPage() {
 
   const handleConfirmTemplateAdd = async () => {
     if (!selectedTemplate || !templateQuantity) return;
-    
+
     try {
       await addTemplateToOfferMutation.mutateAsync({
         offerId: id as string,
@@ -457,9 +459,9 @@ export default function OfferItemsPage() {
         onClose={() => setTemplateQuantityDrawerOpen(false)}
         quantity={templateQuantity}
         onPad={handleTemplateQuantityPad}
-        itemInfo={selectedTemplate && { 
-          name: selectedTemplate.name, 
-          price: selectedTemplate.unitPrice 
+        itemInfo={selectedTemplate && {
+          name: selectedTemplate.name,
+          price: selectedTemplate.unitPrice
         }}
       />
 
