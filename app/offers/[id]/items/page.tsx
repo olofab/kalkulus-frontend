@@ -36,6 +36,11 @@ export default function OfferItemsPage() {
   // Search states
   const [search, setSearch] = useState('');
 
+  // Template quantity states
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [templateQuantityDrawerOpen, setTemplateQuantityDrawerOpen] = useState(false);
+  const [templateQuantity, setTemplateQuantity] = useState('');
+
   const createItemMutation = useCreateItem()
   const updateOfferItemMutation = useUpdateOfferItem()
   const deleteOfferItemMutation = useDeleteOfferItem()
@@ -224,13 +229,37 @@ export default function OfferItemsPage() {
   };
 
   const handleAddTemplateToOffer = async (template: any) => {
+    // Show quantity selector first
+    setSelectedTemplate(template);
+    setTemplateQuantity('');
+    setTemplateQuantityDrawerOpen(true);
+    setSearch(''); // Clear search
+  };
+
+  const handleTemplateQuantityPad = (value: string) => {
+    if (value === 'del') {
+      setTemplateQuantity(prev => prev.slice(0, -1));
+    } else if (value === 'ok') {
+      if (templateQuantity && Number(templateQuantity) > 0) {
+        handleConfirmTemplateAdd();
+      }
+    } else {
+      setTemplateQuantity(prev => prev + value);
+    }
+  };
+
+  const handleConfirmTemplateAdd = async () => {
+    if (!selectedTemplate || !templateQuantity) return;
+    
     try {
       await addTemplateToOfferMutation.mutateAsync({
         offerId: id as string,
-        templateId: template.id,
-        quantity: 1
+        templateId: selectedTemplate.id,
+        quantity: Number(templateQuantity)
       });
-      setSearch(''); // Clear search
+      setTemplateQuantityDrawerOpen(false);
+      setSelectedTemplate(null);
+      setTemplateQuantity('');
       refetch();
     } catch (error) {
       console.error('Error adding template to offer:', error);
@@ -424,6 +453,30 @@ export default function OfferItemsPage() {
             <Button onClick={() => handleCustomQuantityPad('del')}>Slett</Button>
             <Button onClick={() => handleCustomQuantityPad('0')}>0</Button>
             <Button variant="contained" onClick={() => handleCustomQuantityPad('ok')} disabled={!customQuantity || Number(customQuantity) < 1}>OK</Button>
+          </Box>
+        </Box>
+      </Drawer>
+
+      {/* Drawer: Template quantity selector */}
+      <Drawer anchor="bottom" open={templateQuantityDrawerOpen} onClose={() => setTemplateQuantityDrawerOpen(false)} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
+        <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+          {selectedTemplate && (
+            <Box textAlign="center" mb={1}>
+              <Typography variant="h6">{selectedTemplate.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {selectedTemplate.unitPrice.toLocaleString('no-NO')} kr per stk
+              </Typography>
+            </Box>
+          )}
+          <Typography variant="h6">Antall</Typography>
+          <Typography variant="h4">{templateQuantity || '0'}</Typography>
+          <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2} width="100%">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+              <Button key={n} onClick={() => handleTemplateQuantityPad(n.toString())}>{n}</Button>
+            ))}
+            <Button onClick={() => handleTemplateQuantityPad('del')}>Slett</Button>
+            <Button onClick={() => handleTemplateQuantityPad('0')}>0</Button>
+            <Button variant="contained" onClick={() => handleTemplateQuantityPad('ok')} disabled={!templateQuantity || Number(templateQuantity) < 1}>OK</Button>
           </Box>
         </Box>
       </Drawer>
