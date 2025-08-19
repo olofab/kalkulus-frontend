@@ -1,11 +1,10 @@
 'use client'
 
-import { Box, Typography, Chip, CircularProgress, useTheme, Avatar, Divider, Paper } from "@mui/material"
+import { Box, Typography, CircularProgress, useTheme, Avatar, Divider, Paper } from "@mui/material"
 import { useOffer } from "../hooks/useOffer"
 import { useParams } from "next/navigation"
 import { getStatusStyle } from "../utils/StatusStyle"
-import Image from 'next/image'
-import { MapPin, Phone, CalendarDays, ShoppingCart, User } from "lucide-react"
+import { CalendarDays, User } from "lucide-react"
 import dayjs from "dayjs"
 
 export default function HeaderCard() {

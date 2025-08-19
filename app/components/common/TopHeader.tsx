@@ -12,8 +12,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
-  Divider
+  Box
 } from '@mui/material'
 import { ArrowLeft, MoreVertical, Home, Package, Receipt, User, Menu } from 'lucide-react'
 import { useOffer } from '../../offers/hooks/useOffer'
@@ -64,10 +63,10 @@ export default function Header() {
   }
 
   const menu = [
-    { label: 'Dashboard', icon: <Home />, href: '/dashboard' },
-    { label: 'Vareliste', icon: <Package />, href: '/items' },
-    { label: 'Alle tilbud', icon: <Receipt />, href: '/offers' },
-    { label: 'Profil', icon: <User />, href: '/me' },
+    { label: 'Dashboard', icon: <Home size={20} />, href: '/dashboard' },
+    { label: 'Vareliste', icon: <Package size={20} />, href: '/items' },
+    { label: 'Alle tilbud', icon: <Receipt size={20} />, href: '/offers' },
+    { label: 'Profil', icon: <User size={20} />, href: '/me' },
   ]
 
   return (
@@ -119,28 +118,54 @@ export default function Header() {
         anchor="right"
         open={open}
         onClose={() => setOpen(false)}
-        PaperProps={{ sx: { width: 320 } }}
+        PaperProps={{
+          sx: {
+            width: 280,
+            backgroundColor: 'primary.dark',
+            color: 'white',
+            borderTopLeftRadius: 20,
+            borderBottomLeftRadius: 20,
+          }
+        }}
       >
-        <Box sx={{ px: 2, py: 2 }}>
-          <Typography variant="subtitle1" fontWeight={700}>
+        <Box sx={{ px: 3, py: 4 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: 'white', mb: 3 }}>
             Navigasjon
           </Typography>
+
+          <List sx={{ '& .MuiListItemButton-root': { borderRadius: 2, mb: 1, px: 2, py: 1.5 } }}>
+            {menu.map((m) => (
+              <ListItemButton
+                key={m.href}
+                onClick={() => {
+                  setOpen(false)
+                  router.push(m.href)
+                }}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                  color: 'white',
+                }}
+                selected={pathname === m.href || (m.href === '/dashboard' && pathname === '/')}
+              >
+                <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+                  {m.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={m.label}
+                  primaryTypographyProps={{
+                    fontWeight: 500,
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </ListItemButton>
+            ))}
+          </List>
         </Box>
-        <Divider />
-        <List>
-          {menu.map((m) => (
-            <ListItemButton
-              key={m.href}
-              onClick={() => {
-                setOpen(false)
-                router.push(m.href)
-              }}
-            >
-              <ListItemIcon>{m.icon}</ListItemIcon>
-              <ListItemText primary={m.label} />
-            </ListItemButton>
-          ))}
-        </List>
       </Drawer>
     </>
   )

@@ -60,7 +60,7 @@ export default function TestPage() {
       console.log('🔍 Registration response:', res)
       console.log('🔍 Response structure:', Object.keys(res))
       console.log('🔍 Token in response:', res.token)
-      
+
       if (res.token) {
         localStorage.setItem('token', res.token)
         console.log('✅ Token stored in localStorage')

@@ -78,12 +78,8 @@ export default function OfferDetailsPage() {
           description=""
           color="#2979ff"
           onClick={() => router.push(`/offers/${offer.id}/summary`)}
-
         />
       </Box>
-
-
-
       {/* Secondary task actions */}
       <Box pb={4}>
         <Grid container spacing={2}>

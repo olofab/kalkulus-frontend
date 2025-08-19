@@ -84,17 +84,17 @@ export default function AdminUsersPage() {
         ))
       )}
 
-      <Drawer 
-        anchor="bottom" 
-        open={open} 
-        onClose={() => setOpen(false)} 
-        PaperProps={{ 
-          sx: { 
-            borderTopLeftRadius: 16, 
-            borderTopRightRadius: 16, 
+      <Drawer
+        anchor="bottom"
+        open={open}
+        onClose={() => setOpen(false)}
+        PaperProps={{
+          sx: {
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
             p: 3,
             maxHeight: '90vh'
-          } 
+          }
         }}
       >
         <Box>
@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
               <X size={20} />
             </IconButton>
           </Stack>
-          
+
           <Stack spacing={3}>
             <TextField
               label="Navn"
@@ -143,8 +143,8 @@ export default function AdminUsersPage() {
                 <MenuItem value={UserTypeEnum.SUBCONTRACTOR}>Underleverandør</MenuItem>
               </Select>
             </Box>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={handleSave}
               size="large"
               fullWidth
