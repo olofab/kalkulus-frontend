@@ -4,20 +4,20 @@ import {
   Box,
   Typography,
   Button,
-  Dialog,
-  DialogContent,
+  Drawer,
   TextField,
   Select,
   MenuItem,
   Stack,
   Divider,
-  useTheme
+  useTheme,
+  IconButton
 } from '@mui/material'
 import { useState } from 'react'
 import { useCreateUser, useUpdateUser, useUsers } from '../hooks/useUsers'
 import { User, UserType, UserTypeEnum } from '../../types/user'
 import CustomChip, { Severity } from '../../components/common/Chip'
-import { Plus, Divide, UserRoundPen } from 'lucide-react'
+import { Plus, Divide, UserRoundPen, X } from 'lucide-react'
 
 
 export default function AdminUsersPage() {
@@ -84,9 +84,30 @@ export default function AdminUsersPage() {
         ))
       )}
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <DialogContent>
-          <Stack spacing={2}>
+      <Drawer 
+        anchor="bottom" 
+        open={open} 
+        onClose={() => setOpen(false)} 
+        PaperProps={{ 
+          sx: { 
+            borderTopLeftRadius: 16, 
+            borderTopRightRadius: 16, 
+            p: 3,
+            maxHeight: '90vh'
+          } 
+        }}
+      >
+        <Box>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+            <Typography variant="h6" fontWeight={600}>
+              {isEditing ? 'Rediger bruker' : 'Opprett ny bruker'}
+            </Typography>
+            <IconButton onClick={() => setOpen(false)}>
+              <X size={20} />
+            </IconButton>
+          </Stack>
+          
+          <Stack spacing={3}>
             <TextField
               label="Navn"
               value={form.name || ''}
@@ -108,21 +129,32 @@ export default function AdminUsersPage() {
                 fullWidth
               />
             )}
-            <Select
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                Brukertype
+              </Typography>
+              <Select
+                fullWidth
+                value={userType}
+                onChange={(e) => setUserType(e.target.value as UserType)}
+              >
+                <MenuItem value={UserTypeEnum.ADMIN}>Administrator</MenuItem>
+                <MenuItem value={UserTypeEnum.INTERNAL}>Intern bruker</MenuItem>
+                <MenuItem value={UserTypeEnum.SUBCONTRACTOR}>Underleverandør</MenuItem>
+              </Select>
+            </Box>
+            <Button 
+              variant="contained" 
+              onClick={handleSave}
+              size="large"
               fullWidth
-              value={userType}
-              onChange={(e) => setUserType(e.target.value as UserType)}
+              sx={{ mt: 2 }}
             >
-              <MenuItem value={UserTypeEnum.ADMIN}>Administrator</MenuItem>
-              <MenuItem value={UserTypeEnum.INTERNAL}>Intern bruker</MenuItem>
-              <MenuItem value={UserTypeEnum.SUBCONTRACTOR}>Underleverandør</MenuItem>
-            </Select>
-            <Button variant="contained" onClick={handleSave}>
-              {isEditing ? 'Oppdater' : 'Opprett'}
+              {isEditing ? 'Oppdater bruker' : 'Opprett bruker'}
             </Button>
           </Stack>
-        </DialogContent>
-      </Dialog>
+        </Box>
+      </Drawer>
     </Box>
   )
 }
