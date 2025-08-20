@@ -2,7 +2,7 @@
 'use client'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import AppLayout from './AppLayout'
-import theme from '../app/theme'
+import { theme } from './design'
 import './global.css'
 import { Suspense, useEffect, useState } from 'react'
 import LoadingScreen from './components/LoadingScreen'

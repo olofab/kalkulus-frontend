@@ -1,12 +1,13 @@
 'use client'
 
 import {
-  Box, Card, CardContent, Container, Typography, Chip, Stack,
+  Box, CardContent, Container, Typography, Chip, Stack,
   Avatar,
   IconButton,
   useTheme,
   Skeleton
 } from '@mui/material'
+import Card from '../design/components/Card'
 import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs'
 import { useOffers } from './hooks/useOffers'
@@ -84,43 +85,42 @@ export default function OfferListPage() {
           <Stack spacing={2}>
             {sortedOffers.map((offer) => (
               <Card
-                elevation={0}
+                elevation={1}
                 key={offer.id}
                 onClick={() => router.push(`/offers/${offer.id}`)}
+                padding="md"
                 sx={{
-                  p: 2,
-                  pl: 0,
                   cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  backgroundColor: 'transparent',
                   '&:hover': {
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                    transform: 'translateY(-2px)',
                   },
                 }}
               >
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Avatar
-                    sx={{
-                      bgcolor: getStatusStyle(offer.status).color,
-                      color: 'primary.main',
-                      width: 48,
-                      height: 48,
-                    }}
-                    variant='rounded'
-                  >
-                    {getStatusStyle(offer.status).icon}
-                  </Avatar>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Avatar
+                      sx={{
+                        bgcolor: getStatusStyle(offer.status).color,
+                        color: 'primary.main',
+                        width: 48,
+                        height: 48,
+                      }}
+                      variant='rounded'
+                    >
+                      {getStatusStyle(offer.status).icon}
+                    </Avatar>
 
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      {offer.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {offer.customer} {offer.address && ` | ${offer.address}`}
-                    </Typography>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        {offer.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {offer.customer} {offer.address && ` | ${offer.address}`}
+                      </Typography>
+                    </Box>
                   </Box>
+
+
                 </Box>
               </Card>
             ))}

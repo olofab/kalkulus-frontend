@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Box, Typography, Button, Stack, Card, CardContent, Chip } from '@mui/material'
+import { Box, Typography, Stack, Card, CardContent, Chip } from '@mui/material'
 import { apiGet, apiPost, apiPublicPost } from '../lib/api'
 import { runApiTests, testApiConnection } from '../lib/api-test'
 import { debugToken, testAuthenticatedEndpoint } from '../lib/debug'
 import config from '../lib/config'
+import { Button } from '../design'
 
 interface TestResult {
   success: boolean
@@ -94,7 +95,7 @@ export default function TestPage() {
           <Typography variant="h6" gutterBottom>🔗 Connection Test</Typography>
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={handleConnectionTest}
               disabled={isLoading}
             >
@@ -103,7 +104,6 @@ export default function TestPage() {
             {connectionTest && (
               <Chip
                 label={connectionTest.success ? "Connected" : "Failed"}
-                color={connectionTest.success ? "success" : "error"}
               />
             )}
           </Stack>
@@ -121,21 +121,21 @@ export default function TestPage() {
           <Typography variant="h6" gutterBottom>🧪 API Tests</Typography>
           <Stack direction="row" spacing={2} mb={3}>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={handleCompanyMeTest}
               disabled={isLoading}
             >
               Test Company/Me
             </Button>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={handlePost}
               disabled={isLoading}
             >
               Test Registration
             </Button>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={handleFullApiTest}
               disabled={isLoading}
             >
@@ -151,7 +151,7 @@ export default function TestPage() {
           <Typography variant="h6" gutterBottom>🔍 Debug Tools</Typography>
           <Stack direction="row" spacing={2} mb={2}>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={() => {
                 const token = localStorage.getItem('token')
                 console.log('🔍 Current token:', token)
@@ -162,7 +162,7 @@ export default function TestPage() {
               Check Token
             </Button>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={() => {
                 // Set a fake test token for testing purposes
                 const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
@@ -175,7 +175,7 @@ export default function TestPage() {
               Set Test Token
             </Button>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={() => {
                 debugToken()
                 setResponse('Token debug info printed to console')
@@ -185,7 +185,7 @@ export default function TestPage() {
               Debug Token
             </Button>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={async () => {
                 setIsLoading(true)
                 const response = await testAuthenticatedEndpoint()
@@ -197,7 +197,7 @@ export default function TestPage() {
               Test /me Endpoint
             </Button>
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={() => {
                 localStorage.removeItem('token')
                 setResponse('Token cleared from localStorage')

@@ -1,10 +1,11 @@
 // /app/(auth)/welcome/page.tsx
 'use client'
 
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
+import { Button } from '../design'
 
 export default function WelcomePage() {
   const router = useRouter()
@@ -23,8 +24,8 @@ export default function WelcomePage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5 }}>
               <Box display={'flex'} flexDirection={'column'} width={'100%'}>
 
-                <Button variant="contained" onClick={() => router.push('/auth/register')}>Kom i gang</Button>
-                <Button variant="text" onClick={() => router.push('/login')}>Allerede bruker? Logg inn her</Button>
+                <Button variant="primary" onClick={() => router.push('/auth/register')}>Kom i gang</Button>
+                <Button variant="ghost" onClick={() => router.push('/login')}>Allerede bruker? Logg inn her</Button>
               </Box >
 
             </motion.div>

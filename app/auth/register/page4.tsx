@@ -1,9 +1,10 @@
 'use client'
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { Box, Stack, Typography, TextField } from '@mui/material'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiPost, apiPublicPost } from '../../lib/api'
 import axios from 'axios'
+import { Button } from '../../design'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -31,12 +32,12 @@ export default function RegisterPage() {
     <Box p={4}>
       <Typography variant="h5" mb={2}>Opprett firma</Typography>
       <Stack spacing={2}>
-        <TextField label="Firmanavn" name="companyName" fullWidth onChange={handleChange} />
-        <TextField label="Ditt navn" name="name" fullWidth onChange={handleChange} />
-        <TextField label="Organisasjonsnummer" name="organizationNumber" fullWidth onChange={handleChange} />
-        <TextField label="E-post" name="email" fullWidth onChange={handleChange} />
-        <TextField label="Passord" name="password" type="password" fullWidth onChange={handleChange} />
-        <Button variant="contained" onClick={handleRegister}>Opprett firma</Button>
+        <TextField label="Firmanavn" name="companyName" onChange={handleChange} variant="outlined" fullWidth />
+        <TextField label="Ditt navn" name="name" onChange={handleChange} variant="outlined" fullWidth />
+        <TextField label="Organisasjonsnummer" name="organizationNumber" onChange={handleChange} variant="outlined" fullWidth />
+        <TextField label="E-post" name="email" onChange={handleChange} variant="outlined" fullWidth />
+        <TextField label="Passord" name="password" type="password" onChange={handleChange} variant="outlined" fullWidth />
+        <Button variant="primary" onClick={handleRegister}>Opprett firma</Button>
       </Stack>
     </Box>
   )

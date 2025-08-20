@@ -6,23 +6,22 @@ import {
   Box,
   Container,
   Typography,
-  Button,
   TextField,
   InputAdornment,
   IconButton,
-  Tabs,
   Tab,
-  Chip,
   Stack,
   Drawer,
   CircularProgress
 } from '@mui/material'
-import { Search, Clear, Add, Delete } from '@mui/icons-material'
+import { Search, Clear, Add, Delete, MoreVert } from '@mui/icons-material'
 import { useItemTemplates } from '../../hooks/useItemTemplates'
 import { useOfferItems } from '../../hooks/useOfferItems'
 import { useAddTemplateToOffer, useAddCustomItemToOffer, useUpdateOfferItem, useDeleteOfferItem } from '../../../items/hooks/useItems'
 import TopBar from '../../../components/TopBar'
 import { QuantityDrawer } from './Drawers'
+// Import only Button from design system
+import { Button, Tabs } from '../../../design'
 
 export default function ItemsPage() {
   const { id } = useParams()
@@ -68,8 +67,17 @@ export default function ItemsPage() {
     )
     : activeTemplates
 
-  const handleCategoryChange = (_: any, newValue: number | null) => {
-    setSelectedCategory(newValue)
+  // Get tab items for design system tabs
+  const tabItems = [
+    { label: 'Alle', value: 'all' },
+    ...categories.map((category) => ({
+      label: `${category.name} (${groupedTemplates.find(g => g.id === category.id)?.templates.length || 0})`,
+      value: category.id
+    }))
+  ]
+
+  const handleCategoryChange = (newValue: string | number) => {
+    setSelectedCategory(newValue === 'all' ? null : newValue as number)
   }
 
   const handleTemplateSelect = (template: any) => {
@@ -92,8 +100,7 @@ export default function ItemsPage() {
       setSelectedTemplate(null)
       setQuantity('')
 
-      // Go back to offer page
-      router.push(`/offers/${offerId}`)
+      // Stay on items page to continue adding more items
     } catch (error) {
       console.error('Failed to add template:', error)
     }
@@ -127,8 +134,7 @@ export default function ItemsPage() {
       setCustomPrice('')
       setCustomQuantity('')
 
-      // Go back to offer page
-      router.push(`/offers/${offerId}`)
+      // Stay on items page to continue adding more items
     } catch (error) {
       console.error('Failed to add custom item:', error)
     }
@@ -185,10 +191,10 @@ export default function ItemsPage() {
     <>
       <Container maxWidth="sm" sx={{ px: 2, pb: 10 }}>
         {/* Egendefinert vare knapp - øverst */}
-        <Box sx={{ pt: 2, pb: 1 }}>
+        <Box sx={{ pb: 1 }}>
           <Button
             fullWidth
-            variant="outlined"
+            variant="secondary"
             startIcon={<Add />}
             onClick={handleOpenCustomDrawer}
             sx={{
@@ -231,7 +237,7 @@ export default function ItemsPage() {
                   </IconButton>
                 </InputAdornment>
               ),
-              sx: { borderRadius: 1.5 }
+              sx: { borderRadius: 1 }
             }}
           />
         </Box>
@@ -239,27 +245,12 @@ export default function ItemsPage() {
         {/* Category Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, position: 'sticky', top: 70, bgcolor: 'background.default', zIndex: 1 }}>
           <Tabs
-            value={selectedCategory}
+            items={tabItems}
+            value={selectedCategory === null ? 'all' : selectedCategory}
             onChange={handleCategoryChange}
             variant="scrollable"
             scrollButtons="auto"
-            sx={{
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                minWidth: 'auto',
-                px: 2
-              }
-            }}
-          >
-            <Tab label="Alle" value={null} />
-            {categories.map((category) => (
-              <Tab
-                key={category.id}
-                label={`${category.name} (${groupedTemplates.find(g => g.id === category.id)?.templates.length || 0})`}
-                value={category.id}
-              />
-            ))}
-          </Tabs>
+          />
         </Box>
 
         {/* Templates List - Per Category som i /items */}
@@ -290,7 +281,7 @@ export default function ItemsPage() {
                       sx={{
                         border: '1px solid',
                         borderColor: 'divider',
-                        borderRadius: 2,
+                        borderRadius: 1,
                         overflow: 'hidden',
                         bgcolor: 'background.paper'
                       }}
@@ -376,7 +367,7 @@ export default function ItemsPage() {
             sx={{
               border: '1px solid',
               borderColor: 'divider',
-              borderRadius: 2,
+              borderRadius: 1,
               overflow: 'hidden',
               bgcolor: 'background.paper'
             }}
@@ -478,7 +469,6 @@ export default function ItemsPage() {
             <Box
               sx={{
                 borderRadius: 1,
-                p: 2,
                 mb: 2
               }}
             >
@@ -491,12 +481,13 @@ export default function ItemsPage() {
                     alignItems="center"
                     sx={{
                       cursor: 'pointer',
-                      p: 1,
+                      p: 2,
                       borderRadius: 1,
                       transition: 'all 0.2s ease',
-                      backgroundColor: 'transparent',
                       '&:hover': {
-                        bgcolor: 'action.hover'
+                        bgcolor: 'action.hover',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                        transform: 'translateY(-1px)'
                       }
                     }}
                     onClick={() => handleEditItem(item)}
@@ -507,9 +498,12 @@ export default function ItemsPage() {
                         {item.quantity} stk x {item.unitPrice.toLocaleString('no-NO')} kr
                       </Typography>
                     </Box>
-                    <Typography fontWeight={500}>
-                      {(item.quantity * item.unitPrice).toLocaleString('no-NO')} kr
-                    </Typography>
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Typography fontWeight={500}>
+                        {(item.quantity * item.unitPrice).toLocaleString('no-NO')} kr
+                      </Typography>
+                      <MoreVert sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    </Box>
                   </Box>
                 ))}
               </Stack>
@@ -577,14 +571,14 @@ export default function ItemsPage() {
           <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
             <Button
               fullWidth
-              variant="outlined"
+              variant="secondary"
               onClick={() => setCustomDrawerOpen(false)}
             >
               Avbryt
             </Button>
             <Button
               fullWidth
-              variant="contained"
+              variant="primary"
               onClick={handleCustomNext}
               disabled={!customName || !customPrice}
             >
@@ -621,22 +615,27 @@ export default function ItemsPage() {
         open={editItemDrawerOpen}
         onClose={() => setEditItemDrawerOpen(false)}
         PaperProps={{
-          sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 }
+          sx: {
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            backgroundColor: 'white',
+            color: 'text.primary'
+          }
         }}
       >
         <Box sx={{ p: 3, pb: 6 }}>
-          <Typography variant="h6" gutterBottom textAlign="center">
+          <Typography variant="h6" gutterBottom textAlign="center" sx={{ color: 'text.primary' }}>
             {editingItem?.name}
           </Typography>
 
-          <Typography variant="body2" color="text.secondary" textAlign="center" mb={3}>
+          <Typography variant="body2" textAlign="center" mb={3} sx={{ color: 'text.secondary' }}>
             {editingItem?.quantity} stk x {editingItem?.unitPrice?.toLocaleString('no-NO')} kr
           </Typography>
 
           <Stack spacing={2}>
             <Button
               fullWidth
-              variant="outlined"
+              variant="primary"
               onClick={handleEditQuantity}
               sx={{
                 py: 1.5,
@@ -649,15 +648,19 @@ export default function ItemsPage() {
 
             <Button
               fullWidth
-              variant="outlined"
-              color="error"
+              variant="soft"
               startIcon={<Delete />}
               onClick={handleDeleteItem}
               disabled={deleteOfferItemMutation.isPending}
               sx={{
                 py: 1.5,
                 textTransform: 'none',
-                fontWeight: 500
+                fontWeight: 500,
+                backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                color: 'error.main',
+                '&:hover': {
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)'
+                }
               }}
             >
               {deleteOfferItemMutation.isPending ? 'Sletter...' : 'Slett vare'}
@@ -665,7 +668,7 @@ export default function ItemsPage() {
 
             <Button
               fullWidth
-              variant="text"
+              variant="ghost"
               onClick={() => setEditItemDrawerOpen(false)}
               sx={{
                 textTransform: 'none',

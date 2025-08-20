@@ -1,5 +1,6 @@
 import React from 'react';
-import { Drawer, Box, Typography, TextField, Button, MenuItem, CircularProgress } from '@mui/material';
+import { Drawer, Box, Typography, TextField, Button as MuiButton, MenuItem, CircularProgress, alpha, useTheme } from '@mui/material';
+import Button from '../../../design/components/Button';
 
 export function CustomItemDrawer({ open, onClose, name, price, onNameChange, onPriceChange, onNext }) {
   return (
@@ -8,7 +9,7 @@ export function CustomItemDrawer({ open, onClose, name, price, onNameChange, onP
         <Typography variant="h6">Legg til egendefinert vare</Typography>
         <TextField label="Navn" value={name} onChange={onNameChange} fullWidth />
         <TextField label="Pris" type="number" value={price} onChange={onPriceChange} fullWidth />
-        <Button variant="contained" onClick={onNext} disabled={!name || !price}>Neste</Button>
+        <Button variant="primary" onClick={onNext} disabled={!name || !price}>Neste</Button>
       </Box>
     </Drawer>
   );
@@ -23,6 +24,8 @@ export function QuantityDrawer({ open, onClose, quantity, onPad, title = "Antall
   subtitle?: string;
   itemInfo?: { name: string; price?: number };
 }) {
+  const theme = useTheme();
+
   return (
     <Drawer anchor="bottom" open={open} onClose={onClose} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
       <Box display="flex" flexDirection="column" gap={2} alignItems="center">
@@ -41,11 +44,58 @@ export function QuantityDrawer({ open, onClose, quantity, onPad, title = "Antall
         <Typography variant="h4">{quantity || '0'}</Typography>
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2} width="100%">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-            <Button key={n} onClick={() => onPad(n.toString())}>{n}</Button>
+            <Button
+              key={n}
+              variant="secondary"
+              onClick={() => onPad(n.toString())}
+              sx={{
+                height: 60,
+                fontSize: '1.25rem',
+                fontWeight: 'bold',
+                color: '#131313',
+                '&:hover': {
+                  color: '#131313',
+                }
+              }}
+            >
+              {n}
+            </Button>
           ))}
-          <Button onClick={() => onPad('del')}>Slett</Button>
-          <Button onClick={() => onPad('0')}>0</Button>
-          <Button variant="contained" onClick={() => onPad('ok')} disabled={!quantity || Number(quantity) < 1}>OK</Button>
+          <Button
+            onClick={() => onPad('del')}
+            sx={{
+              height: 60,
+              fontSize: '1rem',
+              backgroundColor: alpha(theme.palette.error.main, 0.08),
+              color: theme.palette.error.main,
+              border: 'none',
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.error.main, 0.12),
+                color: theme.palette.error.main,
+              },
+              '&:active': {
+                backgroundColor: alpha(theme.palette.error.main, 0.16),
+              },
+            }}
+          >
+            Slett
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => onPad('0')}
+            sx={{
+              height: 60,
+              fontSize: '1.25rem',
+              fontWeight: 'bold',
+              color: '#131313',
+              '&:hover': {
+                color: '#131313',
+              }
+            }}
+          >
+            0
+          </Button>
+          <Button variant="primary" onClick={() => onPad('ok')} disabled={!quantity || Number(quantity) < 1} sx={{ height: 60, fontSize: '1rem' }}>OK</Button>
         </Box>
       </Box>
     </Drawer>
@@ -76,8 +126,8 @@ export function AddToListDrawer({ open, onClose, name, categories, selectedCateg
             <TextField label="Navn på ny kategori" value={newCategoryName} onChange={onNewCategoryNameChange} fullWidth />
           )}
           <Box display="flex" gap={1}>
-            <Button variant="outlined" fullWidth onClick={onClose}>Nei takk</Button>
-            <Button variant="contained" fullWidth disabled={addingToList || (!selectedCategory || (selectedCategory === -1 && !newCategoryName))} onClick={onAdd}>
+            <Button variant="secondary" fullWidth onClick={onClose}>Nei takk</Button>
+            <Button variant="primary" fullWidth disabled={addingToList || (!selectedCategory || (selectedCategory === -1 && !newCategoryName))} onClick={onAdd}>
               {creatingCategory ? <CircularProgress size={20} /> : 'Ja, legg til'}
             </Button>
           </Box>

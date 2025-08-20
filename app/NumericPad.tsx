@@ -1,6 +1,7 @@
 'use client'
 
-import { Grid, Button } from '@mui/material'
+import { Grid } from '@mui/material'
+import { Button } from './design'
 
 const NumericPad = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←']
@@ -11,7 +12,7 @@ const NumericPad = ({ value, onChange }: { value: string; onChange: (v: string) 
         <Grid item xs={4} key={key}>
           <Button
             fullWidth
-            variant="contained"
+            variant="primary"
             sx={{
               height: 70,
               fontSize: 24,

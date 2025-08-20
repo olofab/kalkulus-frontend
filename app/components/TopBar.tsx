@@ -1,6 +1,6 @@
 // /app/components/TopBar.tsx
 'use client'
-import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem } from '@mui/material'
+import { Menu, MenuItem, AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material'
 import { ArrowLeft, MoreVertical } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -42,27 +42,33 @@ export default function TopBar({ title }: { title?: string }) {
   }
 
   return (
-    <AppBar position="static" elevation={0}>
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {!isHome && (
-          <IconButton edge="start" onClick={() => router.back()} sx={{ color: '#fff' }}>
-            <ArrowLeft />
-          </IconButton>
-        )}
-        <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center', fontWeight: 'bold' }}>
-          {renderTitle()}
-        </Typography>
-        {isEditPage && (
-          <>
-            <IconButton edge="end" onClick={handleMenu} sx={{ color: '#fff' }}>
+    <>
+      <AppBar position="static" elevation={1} sx={{ backgroundColor: 'white', color: 'text.primary' }}>
+        <Toolbar>
+          {!isHome && (
+            <IconButton
+              edge="start"
+              onClick={() => router.back()}
+              sx={{ mr: 2 }}
+            >
+              <ArrowLeft />
+            </IconButton>
+          )}
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            {renderTitle()}
+          </Typography>
+          {isEditPage && (
+            <IconButton onClick={handleMenu} size="small">
               <MoreVertical />
             </IconButton>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-              <MenuItem onClick={handleDelete}>Slett</MenuItem>
-            </Menu>
-          </>
-        )}
-      </Toolbar>
-    </AppBar>
+          )}
+        </Toolbar>
+      </AppBar>
+      {isEditPage && (
+        <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+          <MenuItem onClick={handleDelete}>Slett</MenuItem>
+        </Menu>
+      )}
+    </>
   )
 }

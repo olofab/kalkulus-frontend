@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { Info, Calendar, User, CreditCard, Package, MapPin } from 'lucide-react'
 import { Offer } from '../../../types/offer'
+import { tokens } from '../../../design'
 
 interface OfferDetailsDrawerProps {
   open: boolean
@@ -260,7 +261,7 @@ export default function OfferDetailsDrawer({ open, onClose, offer }: OfferDetail
                     justifyContent="space-between"
                     alignItems="center"
                     sx={{
-                      bgcolor: 'grey.50',
+                      bgcolor: tokens.colors.neutral[100],
                       borderRadius: 1,
                       p: 1.5
                     }}
@@ -299,25 +300,25 @@ export default function OfferDetailsDrawer({ open, onClose, offer }: OfferDetail
 
           <Box
             sx={{
-              bgcolor: 'primary.light',
-              borderRadius: 2,
+              bgcolor: tokens.colors.neutral[100],
+              borderRadius: 1,
               p: 2
             }}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Typography variant="body1" color="primary.dark">
+              <Typography variant="body1" >
                 Totalt ekskl. mva:
               </Typography>
-              <Typography variant="h6" color="primary.dark" fontWeight={600}>
+              <Typography variant="h6" fontWeight={600}>
                 {totalValue.toLocaleString('no-NO')} kr
               </Typography>
             </Box>
 
             <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
-              <Typography variant="body2" color="primary.dark">
+              <Typography variant="body2">
                 Mva (25%):
               </Typography>
-              <Typography variant="body2" color="primary.dark">
+              <Typography variant="body2" >
                 {(totalValue * 0.25).toLocaleString('no-NO')} kr
               </Typography>
             </Box>
@@ -325,10 +326,10 @@ export default function OfferDetailsDrawer({ open, onClose, offer }: OfferDetail
             <Divider sx={{ my: 1, borderColor: 'primary.dark' }} />
 
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Typography variant="h6" color="primary.dark">
+              <Typography variant="h6" >
                 Totalt inkl. mva:
               </Typography>
-              <Typography variant="h5" color="primary.dark" fontWeight={700}>
+              <Typography variant="h5" fontWeight={700}>
                 {(totalValue * 1.25).toLocaleString('no-NO')} kr
               </Typography>
             </Box>

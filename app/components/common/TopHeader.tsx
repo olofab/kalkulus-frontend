@@ -77,8 +77,9 @@ export default function Header() {
         color="transparent"
         sx={{
           p: 2,
-          backgroundColor: theme => theme.palette.background.default
-
+          backgroundColor: theme => theme.palette.background.default,
+          boxShadow: 'none',
+          borderRadius: 0
         }}
       >
         <Toolbar
@@ -102,6 +103,7 @@ export default function Header() {
             noWrap
             sx={{
               fontWeight: 700,
+              color: '#131313',
               justifySelf: showBack ? 'center' : 'start'
             }}
           >
@@ -123,8 +125,8 @@ export default function Header() {
             width: 280,
             backgroundColor: 'primary.dark',
             color: 'white',
-            borderTopLeftRadius: 20,
-            borderBottomLeftRadius: 20,
+            borderTopLeftRadius: '20px !important',
+            borderBottomLeftRadius: '20px !important',
           }
         }}
       >

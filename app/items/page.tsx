@@ -75,17 +75,14 @@ export default function ItemsPage() {
 
   return (
     <Box p={2} pt={0}>
-      {items.length === 0 ?
+      {items.length === 0 &&
         <EmptyState
           title="Ingen lagrede varer"
           description="Alle lagrede varer og kategorier vil vises her"
           imageSrc="/illustrations/empty-box.png"
 
         />
-        :
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h4" color={'primary'}>Vareliste</Typography>
-        </Box>
+
       }
 
 

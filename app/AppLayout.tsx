@@ -14,13 +14,13 @@ export default function AppLayout({ children }: PropsWithChildren) {
   const { user, loading } = useAppContext()
 
   const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
-  const showHeader = !loading && user && !isPublicRoute
-
+  const isDashboard = pathname === '/dashboard'
+  const showHeader = !loading && user && !isPublicRoute && !isDashboard
 
   return (
     <Box>
       {showHeader && <Header />}
-      <Box component="main" sx={{ paddingBottom: 8 }}>{children}</Box>
+      <Box component="main" sx={{ paddingBottom: isDashboard ? 0 : 8 }}>{children}</Box>
     </Box>
   )
 }

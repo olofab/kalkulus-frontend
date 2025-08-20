@@ -66,17 +66,20 @@ export default function OfferDetailsPage() {
       {/* CTA buttons */}
       <Box mt={3} mb={3} display="flex" flexDirection="column" gap={2}>
         <ActionCard
-          icon={<ClipboardList size={24} />}
+          icon={<ClipboardList size={20} />}
           title={offer.items.length > 0 ? 'Fortsett befaring' : 'Start befaring'}
+          subtitle={offer.items.length > 0 ? 'Fortsett å registrere varer' : 'Begynn å registrere varer for tilbudet'}
           description=""
-          color="#3498db"
+          color="#3929b0"
           onClick={() => router.push(`/offers/${offer.id}/items`)}
+          itemCount={offer.items.length}
         />
         <ActionCard
-          icon={<FileText size={24} />}
+          icon={<FileText size={20} />}
           title="Vis estimert tilbud"
+          subtitle="Se samlet oversikt og estimat"
           description=""
-          color="#2979ff"
+          color="#ff818d"
           onClick={() => router.push(`/offers/${offer.id}/summary`)}
         />
       </Box>
@@ -104,10 +107,10 @@ export default function OfferDetailsPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: theme => theme.palette.primary.light, // bakgrunn på ikon-boksen
+                  background: '#131313', // black background
                 }}
               >
-                <Download size={20} color={theme.palette.primary.dark} /> {/* hvitt ikon */}
+                <Download size={20} color="#FFFFFF" /> {/* white icon */}
               </Box>
               <Typography fontWeight={500}>Last ned PDF</Typography>
             </Box>
@@ -133,10 +136,10 @@ export default function OfferDetailsPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: theme => theme.palette.primary.light,
+                  background: '#131313',
                 }}
               >
-                <RefreshCw size={20} color={theme.palette.primary.dark} />
+                <RefreshCw size={20} color="#FFFFFF" />
               </Box>
               <Typography fontWeight={500}>Oppdater tilbudets status</Typography>
             </Box>
@@ -162,10 +165,10 @@ export default function OfferDetailsPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: theme => theme.palette.primary.light,
+                  background: '#131313',
                 }}
               >
-                <Trash2 size={20} color={theme.palette.primary.dark} />
+                <Trash2 size={20} color="#FFFFFF" />
               </Box>
               <Typography fontWeight={500}>Slett tilbud</Typography>
             </Box>
@@ -191,10 +194,10 @@ export default function OfferDetailsPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: theme => theme.palette.primary.light,
+                  background: '#131313',
                 }}
               >
-                <Info size={20} color={theme.palette.primary.dark} />
+                <Info size={20} color="#FFFFFF" />
               </Box>
               <Typography fontWeight={500}>Vis detaljer om tilbud</Typography>
             </Box>

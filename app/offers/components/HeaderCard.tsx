@@ -88,7 +88,10 @@ export default function HeaderCard() {
         <Box
           display="flex"
           alignItems="center"
-          bgcolor="primary.light"
+          sx={{
+            backgroundColor: 'rgba(57, 41, 176, 0.08)', // alpha(primary[500], 0.08)
+            color: '#2d2189', // primary[600] equivalent
+          }}
           borderRadius={1}
           p={1.2}
           mt={2}
