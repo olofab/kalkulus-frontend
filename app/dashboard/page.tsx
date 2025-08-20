@@ -19,7 +19,6 @@ import { ClipboardList, PackageSearch, FileSearch, ArrowRight } from 'lucide-rea
 import { getStatusStyle } from '../offers/utils/StatusStyle'
 import Image from 'next/image'
 import NewOfferDrawer from '../offers/components/CreateOfferDrawer'
-import TopHeader from '../components/common/TopHeader'
 import { Button, tokens } from '../design'
 import { Card as DesignCard } from '../design'
 
@@ -124,7 +123,6 @@ export default function DashboardPage() {
   if (true) {
     return (
       <>
-        <TopHeader />
         <Box p={3} pt={1}>
           {error && (
             <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
