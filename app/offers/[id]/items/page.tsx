@@ -1,540 +1,703 @@
 'use client'
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { Box, Container, Typography, Button, Paper, TextField, MenuItem, Drawer, Stack, InputBase, IconButton, Menu } from '@mui/material';
-import { apiPost, apiPut } from '../../../lib/api';
-import { useOfferItems } from '../../hooks/useOfferItems';
-import { useItemTemplates } from '../../hooks/useItemTemplates';
-import { CirclePlus, Search, X, MoreVertical, Edit, Trash } from 'lucide-react';
-import { useCreateItem, useUpdateOfferItem, useDeleteOfferItem, useAddTemplateToOffer, useAddCustomItemToOffer } from '../../../items/hooks/useItems'
-import { QuantityDrawer, CustomItemDrawer, AddToListDrawer } from './Drawers';
 
+import { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Tabs,
+  Tab,
+  Chip,
+  Stack,
+  Drawer,
+  CircularProgress
+} from '@mui/material'
+import { Search, Clear, Add, Delete } from '@mui/icons-material'
+import { useItemTemplates } from '../../hooks/useItemTemplates'
+import { useOfferItems } from '../../hooks/useOfferItems'
+import { useAddTemplateToOffer, useAddCustomItemToOffer, useUpdateOfferItem, useDeleteOfferItem } from '../../../items/hooks/useItems'
+import TopBar from '../../../components/TopBar'
+import { QuantityDrawer } from './Drawers'
 
-export default function OfferItemsPage() {
-  const { id } = useParams();
-  const { data: items = [], isLoading, error, refetch } = useOfferItems(id as string);
-  const { categories, templates } = useItemTemplates();
+export default function ItemsPage() {
+  const { id } = useParams()
+  const router = useRouter()
+  const offerId = id as string
 
-  // Custom item states
-  const [customDrawerOpen, setCustomDrawerOpen] = useState(false);
-  const [customName, setCustomName] = useState('');
-  const [customPrice, setCustomPrice] = useState('');
-  const [customQuantityDrawerOpen, setCustomQuantityDrawerOpen] = useState(false);
-  const [customQuantity, setCustomQuantity] = useState('');
-  const [lastAddedItemId, setLastAddedItemId] = useState<number | null>(null);
-
-  // Add-to-list drawer states
-  const [showAddToListDrawer, setShowAddToListDrawer] = useState(false);
-  const [selectedListCategory, setSelectedListCategory] = useState<number | null>(null);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [addingToList, setAddingToList] = useState(false);
-  const [addToListSuccess, setAddToListSuccess] = useState(false);
-
-  // Store the item data for vareliste
-  const [savedItemName, setSavedItemName] = useState('');
-  const [savedItemPrice, setSavedItemPrice] = useState('');
-
-  // Search states
-  const [search, setSearch] = useState('');
-
-  // Template quantity states
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
-  const [templateQuantityDrawerOpen, setTemplateQuantityDrawerOpen] = useState(false);
-  const [templateQuantity, setTemplateQuantity] = useState('');
-
-  const createItemMutation = useCreateItem()
-  const updateOfferItemMutation = useUpdateOfferItem()
-  const deleteOfferItemMutation = useDeleteOfferItem()
+  // Hooks
+  const { categories, groupedTemplates } = useItemTemplates()
+  const { data: offerItems = [] } = useOfferItems(offerId)
   const addTemplateToOfferMutation = useAddTemplateToOffer()
   const addCustomItemToOfferMutation = useAddCustomItemToOffer()
+  const updateOfferItemMutation = useUpdateOfferItem()
+  const deleteOfferItemMutation = useDeleteOfferItem()
 
-  // Edit item states
+  // States
+  const [search, setSearch] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
+  const [quantityDrawerOpen, setQuantityDrawerOpen] = useState(false)
+  const [quantity, setQuantity] = useState('')
+
+  // Custom item states
+  const [customDrawerOpen, setCustomDrawerOpen] = useState(false)
+  const [customName, setCustomName] = useState('')
+  const [customPrice, setCustomPrice] = useState('')
+  const [customQuantityDrawerOpen, setCustomQuantityDrawerOpen] = useState(false)
+  const [customQuantity, setCustomQuantity] = useState('')
+
+  // Edit existing item states
+  const [editItemDrawerOpen, setEditItemDrawerOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [editQuantityDrawerOpen, setEditQuantityDrawerOpen] = useState(false)
   const [editQuantity, setEditQuantity] = useState('')
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
-  const [selectedItemForMenu, setSelectedItemForMenu] = useState<any>(null)
 
-  // Step 1: User enters name/price, opens numpad for quantity
-  const handleOpenCustomDrawer = () => {
-    setCustomDrawerOpen(true);
-  };
-  const handleCancelCustom = () => {
-    setCustomDrawerOpen(false);
-    setCustomName('');
-    setCustomPrice('');
-  };
-  const handleCustomNext = () => {
-    if (!customName || !customPrice) return;
-    setCustomDrawerOpen(false);
-    setCustomQuantityDrawerOpen(true);
-  };
+  // Get active templates based on category and search
+  const activeTemplates = selectedCategory !== null
+    ? groupedTemplates.find(g => g.id === selectedCategory)?.templates || []
+    : groupedTemplates.flatMap(g => g.templates)
 
-  // Step 2: User enters quantity
-  const handleCustomQuantityPad = (val: string) => {
-    if (val === 'del') {
-      setCustomQuantity(q => q.length > 1 ? q.slice(0, -1) : '');
-    } else if (val === 'ok') {
-      handleAddCustomItem();
-    } else {
-      setCustomQuantity(q => (q + val).replace(/^0+/, ''));
-    }
-  };
+  const filteredTemplates = search
+    ? activeTemplates.filter(t =>
+      t.name.toLowerCase().includes(search.toLowerCase())
+    )
+    : activeTemplates
 
-  // Step 3: Add item to offer (no category yet)
-  const handleAddCustomItem = async () => {
-    if (!customName || !customPrice || !customQuantity || Number(customQuantity) < 1) return;
-    try {
-      const res = await addCustomItemToOfferMutation.mutateAsync({
-        offerId: id as string,
-        name: customName,
-        unitPrice: Number(customPrice),
-        quantity: Number(customQuantity),
-        categoryId: null, // No category yet
-      });
-      setLastAddedItemId(res.itemId);
+  const handleCategoryChange = (_: any, newValue: number | null) => {
+    setSelectedCategory(newValue)
+  }
 
-      // Save the item data for later use in vareliste
-      setSavedItemName(customName);
-      setSavedItemPrice(customPrice);
+  const handleTemplateSelect = (template: any) => {
+    setSelectedTemplate(template)
+    setQuantity('')
+    setQuantityDrawerOpen(true)
+  }
 
-      setCustomName('');
-      setCustomPrice('');
-      setCustomQuantity('');
-      setCustomQuantityDrawerOpen(false);
-      setShowAddToListDrawer(true);
-      refetch();
-    } catch (error) {
-      console.error('Error adding custom item:', error);
-    }
-  };
-
-  // Step 4: Add to vareliste and update offer item with category
-  const handleAddToList = async () => {
-    if (!selectedListCategory && selectedListCategory !== 0) return;
-    setAddingToList(true);
-    let categoryId = selectedListCategory;
-
-    // If new category
-    if (selectedListCategory === -1 && newCategoryName) {
-      try {
-        const catRes = await apiPost('/api/categories', { name: newCategoryName });
-        categoryId = catRes.id;
-      } catch (err) {
-        setAddingToList(false);
-        return;
-      }
-    }
-
-    try {
-      // 1. Add to vareliste
-      await createItemMutation.mutateAsync({
-        name: savedItemName,
-        unitPrice: Number(savedItemPrice),
-        categoryId,
-      });
-
-      // 2. Update offer item with new category
-      if (lastAddedItemId) {
-        await updateOfferItemMutation.mutateAsync({
-          offerId: id as string,
-          itemId: lastAddedItemId,
-          data: { categoryId }
-        });
-        refetch();
-      }
-
-      setAddToListSuccess(true);
-      setTimeout(() => {
-        setShowAddToListDrawer(false);
-        setAddToListSuccess(false);
-        setSelectedListCategory(null);
-        setNewCategoryName('');
-        setSavedItemName('');
-        setSavedItemPrice('');
-      }, 1200);
-    } catch (error) {
-      console.error('Error adding to list or updating offer item:', error);
-    } finally {
-      setAddingToList(false);
-    }
-  };
-
-  // Edit item functions
-  const handleItemMenuClick = (event: React.MouseEvent<HTMLElement>, item: any) => {
-    setMenuAnchorEl(event.currentTarget);
-    setSelectedItemForMenu(item);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-    setSelectedItemForMenu(null);
-  };
-
-  const handleEditQuantity = () => {
-    if (selectedItemForMenu) {
-      setEditingItem(selectedItemForMenu);
-      setEditQuantity(selectedItemForMenu.quantity.toString());
-      setEditQuantityDrawerOpen(true);
-      handleMenuClose();
-    }
-  };
-
-  const handleDeleteItem = async () => {
-    if (selectedItemForMenu) {
-      try {
-        await deleteOfferItemMutation.mutateAsync({
-          offerId: id as string,
-          itemId: selectedItemForMenu.id
-        });
-        refetch();
-        handleMenuClose();
-      } catch (error) {
-        console.error('Error deleting item:', error);
-      }
-    }
-  };
-
-  const handleEditQuantityPad = (val: string) => {
-    if (val === 'del') {
-      setEditQuantity(q => q.length > 1 ? q.slice(0, -1) : '');
-    } else if (val === 'ok') {
-      handleUpdateQuantity();
-    } else {
-      setEditQuantity(q => (q + val).replace(/^0+/, ''));
-    }
-  };
-
-  const handleUpdateQuantity = async () => {
-    if (!editingItem || !editQuantity || Number(editQuantity) < 1) return;
-
-    try {
-      console.log('Updating quantity:', {
-        offerId: id as string,
-        itemId: editingItem.id,
-        data: { quantity: Number(editQuantity) }
-      });
-
-      await updateOfferItemMutation.mutateAsync({
-        offerId: id as string,
-        itemId: editingItem.id,
-        data: { quantity: Number(editQuantity) }
-      });
-
-      setEditQuantityDrawerOpen(false);
-      setEditingItem(null);
-      setEditQuantity('');
-      refetch();
-    } catch (error) {
-      console.error('Error updating quantity:', error);
-      alert('Feil ved oppdatering av antall: ' + (error as any)?.message);
-    }
-  };
-
-  const handleAddTemplateToOffer = async (template: any) => {
-    // Show quantity selector first
-    setSelectedTemplate(template);
-    setTemplateQuantity('');
-    setTemplateQuantityDrawerOpen(true);
-    setSearch(''); // Clear search
-  };
-
-  const handleTemplateQuantityPad = (value: string) => {
-    if (value === 'del') {
-      setTemplateQuantity(prev => prev.slice(0, -1));
-    } else if (value === 'ok') {
-      if (templateQuantity && Number(templateQuantity) > 0) {
-        handleConfirmTemplateAdd();
-      }
-    } else {
-      setTemplateQuantity(prev => prev + value);
-    }
-  };
-
-  const handleConfirmTemplateAdd = async () => {
-    if (!selectedTemplate || !templateQuantity) return;
+  const handleAddTemplate = async () => {
+    if (!selectedTemplate || !quantity || Number(quantity) < 1) return
 
     try {
       await addTemplateToOfferMutation.mutateAsync({
-        offerId: id as string,
+        offerId,
         templateId: selectedTemplate.id,
-        quantity: Number(templateQuantity)
-      });
-      setTemplateQuantityDrawerOpen(false);
-      setSelectedTemplate(null);
-      setTemplateQuantity('');
-      refetch();
-    } catch (error) {
-      console.error('Error adding template to offer:', error);
-    }
-  };
+        quantity: Number(quantity)
+      })
 
-  if (error) return <Typography color="error">Feil ved henting av varer</Typography>;
-  if (isLoading) return <Typography>Laster inn...</Typography>;
+      setQuantityDrawerOpen(false)
+      setSelectedTemplate(null)
+      setQuantity('')
+
+      // Go back to offer page
+      router.push(`/offers/${offerId}`)
+    } catch (error) {
+      console.error('Failed to add template:', error)
+    }
+  }
+
+  // Custom item handlers
+  const handleOpenCustomDrawer = () => {
+    setCustomDrawerOpen(true)
+  }
+
+  const handleCustomNext = () => {
+    if (!customName || !customPrice) return
+    setCustomDrawerOpen(false)
+    setCustomQuantityDrawerOpen(true)
+  }
+
+  const handleAddCustomItem = async () => {
+    if (!customName || !customPrice || !customQuantity || Number(customQuantity) < 1) return
+
+    try {
+      await addCustomItemToOfferMutation.mutateAsync({
+        offerId,
+        name: customName,
+        unitPrice: Number(customPrice),
+        quantity: Number(customQuantity)
+      })
+
+      setCustomDrawerOpen(false)
+      setCustomQuantityDrawerOpen(false)
+      setCustomName('')
+      setCustomPrice('')
+      setCustomQuantity('')
+
+      // Go back to offer page
+      router.push(`/offers/${offerId}`)
+    } catch (error) {
+      console.error('Failed to add custom item:', error)
+    }
+  }
+
+  // Edit existing item handlers
+  const handleEditItem = (item: any) => {
+    setEditingItem(item)
+    setEditItemDrawerOpen(true)
+  }
+
+  const handleEditQuantity = () => {
+    if (!editingItem) return
+    setEditQuantity(editingItem.quantity.toString())
+    setEditItemDrawerOpen(false)
+    setEditQuantityDrawerOpen(true)
+  }
+
+  const handleUpdateQuantity = async () => {
+    if (!editingItem || !editQuantity || Number(editQuantity) < 1) return
+
+    try {
+      await updateOfferItemMutation.mutateAsync({
+        offerId,
+        itemId: editingItem.id,
+        data: { quantity: Number(editQuantity) }
+      })
+
+      setEditQuantityDrawerOpen(false)
+      setEditingItem(null)
+      setEditQuantity('')
+    } catch (error) {
+      console.error('Failed to update item quantity:', error)
+    }
+  }
+
+  const handleDeleteItem = async () => {
+    if (!editingItem) return
+
+    try {
+      await deleteOfferItemMutation.mutateAsync({
+        offerId,
+        itemId: editingItem.id
+      })
+
+      setEditItemDrawerOpen(false)
+      setEditingItem(null)
+    } catch (error) {
+      console.error('Failed to delete item:', error)
+    }
+  }
 
   return (
-    <Container maxWidth="sm" sx={{ p: 0 }}>
-      {/* Egendefinert vare */}
-      <Box mt={4} mb={2}>
-        <Paper
-          onClick={handleOpenCustomDrawer}
-          sx={{
-            borderRadius: 3,
-            p: 3,
-            mb: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: 100,
-            border: '1.5px dashed #cfd8dc',
-            backgroundColor: 'primary.light',
-            cursor: 'pointer',
-            boxShadow: 'none',
-            transition: 'background 0.2s',
-            '&:hover': { backgroundColor: '#f0f4fa' },
-          }}
-          elevation={0}
-        >
-          <CirclePlus size={28} style={{ opacity: 0.7, marginBottom: 8 }} />
-          <Typography fontWeight={600} align="center">Egendefinert</Typography>
-          <Typography variant="body2" color="text.secondary" align="center">
-            Legg til egendefinerte varer på stedet
-          </Typography>
-        </Paper>
-      </Box>
-
-      {/* Søkefelt for varer */}
-      <Box sx={{ position: 'relative', mb: 2 }}>
-        <Paper
-          component="form"
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            px: 2,
-            py: 1,
-            borderRadius: 2,
-            backgroundColor: 'background.paper',
-            boxShadow: 0,
-            border: '1px solid #ddd',
-          }}
-          onSubmit={e => e.preventDefault()}
-        >
-          <Search size={24} style={{ marginRight: 8, color: '#90a4ae' }} />
-          <InputBase
-            sx={{ ml: 1, flex: 1 }}
-            placeholder="Søk etter vare..."
-            inputProps={{ 'aria-label': 'søk etter vare' }}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          {search && (
-            <IconButton
-              size="small"
-              onClick={() => setSearch('')}
-              sx={{ ml: 1 }}
-              aria-label="Tøm søk"
-            >
-              <X size={20} />
-            </IconButton>
-          )}
-        </Paper>
-
-        {/* Søkeresultater overlay */}
-        {search.trim() && (
-          <Box
+    <>
+      <Container maxWidth="sm" sx={{ px: 2, pb: 10 }}>
+        {/* Egendefinert vare knapp - øverst */}
+        <Box sx={{ pt: 2, pb: 1 }}>
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<Add />}
+            onClick={handleOpenCustomDrawer}
             sx={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              zIndex: 10,
-              bgcolor: 'background.paper',
-              borderRadius: 2,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              mt: 1,
-              maxHeight: 400,
-              overflowY: 'auto',
-              border: '1px solid #ddd',
+              py: 1.5,
+              borderRadius: 1,
+              textTransform: 'none',
+              fontWeight: 500,
+              borderStyle: 'dashed',
+              borderWidth: 2,
+              color: 'text.secondary',
+              borderColor: 'divider',
+              '&:hover': {
+                borderColor: 'primary.main',
+                color: 'primary.main',
+                bgcolor: 'action.hover'
+              }
             }}
           >
-            <Stack spacing={0.5} p={1}>
-              {templates?.filter(tpl => tpl.name.toLowerCase().includes(search.toLowerCase())).length === 0 ? (
-                <Typography color="text.secondary" sx={{ pl: 0.5, pt: 1 }}>Ingen varer funnet</Typography>
-              ) : (
-                templates?.filter(tpl => tpl.name.toLowerCase().includes(search.toLowerCase())).map((tpl) => (
-                  <Box
-                    key={tpl.id}
-                    onClick={() => handleAddTemplateToOffer(tpl)}
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      px: 1,
-                      py: 1.2,
-                      borderRadius: 1,
-                      transition: 'background 0.15s',
-                      '&:hover': {
-                        backgroundColor: '#f3f7ff',
-                      },
-                      '&:active': {
-                        backgroundColor: '#e3eefd',
-                      },
-                    }}
-                  >
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography fontWeight={500} fontSize={16}>{tpl.name}</Typography>
-                      <Typography color="text.secondary" fontSize={15}>
-                        {tpl.unitPrice.toLocaleString('no-NO')} kr
-                      </Typography>
-                      {tpl.categories.length > 0 && (
-                        <Typography variant="caption" sx={{ backgroundColor: '#e3f2fd', px: 1, py: 0.2, borderRadius: 1 }}>
-                          {tpl.categories[0].name}
-                        </Typography>
-                      )}
-                    </Box>
-                    <CirclePlus size={22} style={{ color: '#2979ff', opacity: 0.85, flexShrink: 0 }} />
-                  </Box>
-                ))
-              )}
-            </Stack>
-          </Box>
-        )}
-      </Box>
+            Legg til egendefinert vare
+          </Button>
+        </Box>
 
-      {/* Valgte varer */}
-      <Box mt={4}>
-        <Typography variant="h6" mb={2}>Valgte varer</Typography>
-        {items.length === 0 ? (
-          <Typography color="text.secondary">Ingen varer er lagt til ennå.</Typography>
-        ) : (
-          <Box display="flex" flexDirection="column" gap={1}>
-            {items.map((item, idx) => (
-              <Box key={idx} display="flex" justifyContent="space-between" alignItems="center" p={2} borderRadius={2} bgcolor="#f7f7f7" mb={1}>
-                <Box flex={1}>
-                  <Typography fontWeight={600}>{item.name}</Typography>
+        {/* Search */}
+        <Box sx={{ pb: 1, position: 'sticky', top: 0, bgcolor: 'background.default', zIndex: 1 }}>
+          <TextField
+            fullWidth
+            placeholder="Søk etter vare"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="action" />
+                </InputAdornment>
+              ),
+              endAdornment: search && (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setSearch('')} size="small">
+                    <Clear />
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 1.5 }
+            }}
+          />
+        </Box>
+
+        {/* Category Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, position: 'sticky', top: 70, bgcolor: 'background.default', zIndex: 1 }}>
+          <Tabs
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                minWidth: 'auto',
+                px: 2
+              }
+            }}
+          >
+            <Tab label="Alle" value={null} />
+            {categories.map((category) => (
+              <Tab
+                key={category.id}
+                label={`${category.name} (${groupedTemplates.find(g => g.id === category.id)?.templates.length || 0})`}
+                value={category.id}
+              />
+            ))}
+          </Tabs>
+        </Box>
+
+        {/* Templates List - Per Category som i /items */}
+        {selectedCategory === null ? (
+          // Vis alle kategorier med grupperte varer
+          <Stack spacing={3}>
+            {groupedTemplates
+              .filter(group =>
+                search
+                  ? group.templates.some(t =>
+                    t.name.toLowerCase().includes(search.toLowerCase())
+                  )
+                  : group.templates.length > 0
+              )
+              .map((group) => {
+                const filteredGroupTemplates = search
+                  ? group.templates.filter(t =>
+                    t.name.toLowerCase().includes(search.toLowerCase())
+                  )
+                  : group.templates
+
+                return (
+                  <Box key={group.id}>
+                    <Typography variant="h6" mb={1} color="text.primary">
+                      {group.name}
+                    </Typography>
+                    <Box
+                      sx={{
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        bgcolor: 'background.paper'
+                      }}
+                    >
+                      {filteredGroupTemplates.map((template, index) => (
+                        <Box
+                          key={template.id}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            px: 2,
+                            py: 1.5,
+                            borderTop: index === 0 ? 'none' : '1px solid #eee',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              bgcolor: 'action.hover',
+                            }
+                          }}
+                          onClick={() => handleTemplateSelect(template)}
+                        >
+                          <Box>
+                            <Typography fontWeight={500} variant="body1">
+                              {template.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {template.unitPrice.toLocaleString('no-NO')} kr/stk
+                            </Typography>
+                          </Box>
+
+                          <Box
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: '50%',
+                              bgcolor: 'primary.main',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                bgcolor: 'primary.dark',
+                                transform: 'scale(1.1)',
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleTemplateSelect(template)
+                            }}
+                          >
+                            <Add sx={{ fontSize: 18 }} />
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                )
+              })}
+
+            {/* Hvis ingen varer funnet */}
+            {groupedTemplates.every(group =>
+              search
+                ? !group.templates.some(t =>
+                  t.name.toLowerCase().includes(search.toLowerCase())
+                )
+                : group.templates.length === 0
+            ) && (
+                <Box textAlign="center" py={6}>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    Ingen varer funnet
+                  </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {item.quantity} stk x {item.unitPrice.toLocaleString('no-NO')} kr
+                    {search ? 'Prøv et annet søkeord' : 'Ingen varer tilgjengelig'}
                   </Typography>
                 </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Typography fontWeight={600}>{(item.quantity * item.unitPrice).toLocaleString('no-NO')} kr</Typography>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleItemMenuClick(e, item)}
-                    sx={{ ml: 1 }}
-                  >
-                    <MoreVertical size={18} />
-                  </IconButton>
-                </Box>
+              )}
+          </Stack>
+        ) : (
+          // Vis kun valgt kategori
+          <Box
+            sx={{
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              overflow: 'hidden',
+              bgcolor: 'background.paper'
+            }}
+          >
+            {filteredTemplates.length === 0 ? (
+              <Box textAlign="center" py={6}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  Ingen varer funnet
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {search ? 'Prøv et annet søkeord' : 'Ingen varer i denne kategorien'}
+                </Typography>
               </Box>
-            ))}
+            ) : (
+              filteredTemplates.map((template, index) => (
+                <Box
+                  key={template.id}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    px: 2,
+                    py: 1.5,
+                    borderTop: index === 0 ? 'none' : '1px solid #eee',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                    }
+                  }}
+                  onClick={() => handleTemplateSelect(template)}
+                >
+                  <Box>
+                    <Typography fontWeight={500} variant="body1">
+                      {template.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {template.unitPrice.toLocaleString('no-NO')} kr/stk
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: 'primary.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        bgcolor: 'primary.dark',
+                        transform: 'scale(1.1)',
+                      }
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleTemplateSelect(template)
+                    }}
+                  >
+                    <Add sx={{ fontSize: 18 }} />
+                  </Box>
+                </Box>
+              ))
+            )}
           </Box>
         )}
-      </Box>
 
-      {/* Drawer: Step 1 - navn og pris */}
-      <Drawer anchor="bottom" open={customDrawerOpen} onClose={handleCancelCustom} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
-        <Box display="flex" flexDirection="column" gap={2}>
-          <Typography variant="h6">Legg til egendefinert vare</Typography>
-          <TextField label="Navn" value={customName} onChange={e => setCustomName(e.target.value)} fullWidth />
-          <TextField label="Pris" type="number" value={customPrice} onChange={e => setCustomPrice(e.target.value)} fullWidth />
-          <Button variant="contained" onClick={handleCustomNext} disabled={!customName || !customPrice}>Neste</Button>
+        {/* Divider og varer i tilbudet - til slutt */}
+        {offerItems.length > 0 && (
+          <>
+            <Box sx={{ my: 4 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                textAlign="center"
+                sx={{
+                  position: 'relative',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: '50%',
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    backgroundColor: 'divider',
+                    zIndex: 0
+                  }
+                }}
+              >
+                <Box component="span" sx={{ bgcolor: 'background.default', px: 2, position: 'relative', zIndex: 1 }}>
+                  Varer i tilbudet
+                </Box>
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                borderRadius: 1,
+                p: 2,
+                mb: 2
+              }}
+            >
+              <Stack spacing={1}>
+                {offerItems.map((item) => (
+                  <Box
+                    key={item.id}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    sx={{
+                      cursor: 'pointer',
+                      p: 1,
+                      borderRadius: 1,
+                      transition: 'all 0.2s ease',
+                      backgroundColor: 'transparent',
+                      '&:hover': {
+                        bgcolor: 'action.hover'
+                      }
+                    }}
+                    onClick={() => handleEditItem(item)}
+                  >
+                    <Box>
+                      <Typography fontWeight={500}>{item.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {item.quantity} stk x {item.unitPrice.toLocaleString('no-NO')} kr
+                      </Typography>
+                    </Box>
+                    <Typography fontWeight={500}>
+                      {(item.quantity * item.unitPrice).toLocaleString('no-NO')} kr
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
+          </>
+        )}
+      </Container>
+
+      {/* Quantity Drawer */}
+      <QuantityDrawer
+        open={quantityDrawerOpen}
+        onClose={() => setQuantityDrawerOpen(false)}
+        quantity={quantity}
+        onPad={(val) => {
+          if (val === 'del') {
+            setQuantity(q => q.length > 1 ? q.slice(0, -1) : '')
+          } else if (val === 'ok') {
+            handleAddTemplate()
+          } else {
+            setQuantity(q => (q + val).replace(/^0+/, ''))
+          }
+        }}
+        title="Hvor mange varer?"
+        itemInfo={selectedTemplate ? {
+          name: selectedTemplate.name,
+          price: selectedTemplate.unitPrice
+        } : undefined}
+      />
+
+      {/* Custom Item Drawer - Step 1: Name and Price */}
+      <Drawer
+        anchor="bottom"
+        open={customDrawerOpen}
+        onClose={() => setCustomDrawerOpen(false)}
+        PaperProps={{
+          sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 }
+        }}
+      >
+        <Box sx={{ p: 3, pb: 6 }}>
+          <Typography variant="h6" gutterBottom textAlign="center">
+            Legg til egendefinert vare
+          </Typography>
+
+          <Stack spacing={3} sx={{ mt: 3 }}>
+            <TextField
+              fullWidth
+              label="Varenavn"
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              placeholder="F.eks. Spesial reparasjon"
+            />
+            <TextField
+              fullWidth
+              label="Pris per stykk"
+              value={customPrice}
+              onChange={(e) => setCustomPrice(e.target.value)}
+              placeholder="0"
+              type="number"
+              InputProps={{
+                endAdornment: <Typography variant="body2" color="text.secondary">kr</Typography>
+              }}
+            />
+          </Stack>
+
+          <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => setCustomDrawerOpen(false)}
+            >
+              Avbryt
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={handleCustomNext}
+              disabled={!customName || !customPrice}
+            >
+              Neste
+            </Button>
+          </Stack>
         </Box>
       </Drawer>
 
-      {/* Custom item quantity drawer */}
+      {/* Custom Item Quantity Drawer - Step 2: Quantity */}
       <QuantityDrawer
         open={customQuantityDrawerOpen}
         onClose={() => setCustomQuantityDrawerOpen(false)}
         quantity={customQuantity}
-        onPad={handleCustomQuantityPad}
-        itemInfo={{ name: customName, price: Number(customPrice) }}
+        onPad={(val) => {
+          if (val === 'del') {
+            setCustomQuantity(q => q.length > 1 ? q.slice(0, -1) : '')
+          } else if (val === 'ok') {
+            handleAddCustomItem()
+          } else {
+            setCustomQuantity(q => (q + val).replace(/^0+/, ''))
+          }
+        }}
+        title="Hvor mange?"
+        itemInfo={customName ? {
+          name: customName,
+          price: Number(customPrice)
+        } : undefined}
       />
 
-      {/* Template quantity drawer */}
-      <QuantityDrawer
-        open={templateQuantityDrawerOpen}
-        onClose={() => setTemplateQuantityDrawerOpen(false)}
-        quantity={templateQuantity}
-        onPad={handleTemplateQuantityPad}
-        itemInfo={selectedTemplate && {
-          name: selectedTemplate.name,
-          price: selectedTemplate.unitPrice
-        }}
-      />
-
-      {/* Drawer: Step 3 - vareliste og kategori */}
-      <Drawer anchor="bottom" open={showAddToListDrawer} onClose={() => setShowAddToListDrawer(false)} PaperProps={{ sx: { borderTopLeftRadius: 16, p: 3 } }}>
-        {!addToListSuccess ? (
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Typography variant="h6">Vil du legge til varen i vareliste?</Typography>
-            <Typography variant="body2" color="text.secondary">Da kan du bruke varen igjen senere.</Typography>
-            <TextField
-              select
-              label="Kategori"
-              value={selectedListCategory ?? ''}
-              onChange={e => setSelectedListCategory(Number(e.target.value))}
-              fullWidth
-              sx={{ mb: 2 }}
-            >
-              {categories.map((cat) => (
-                <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
-              ))}
-              <MenuItem value={-1}>Ny kategori...</MenuItem>
-            </TextField>
-            {selectedListCategory === -1 && (
-              <TextField label="Navn på ny kategori" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} fullWidth />
-            )}
-            <Box display="flex" gap={1}>
-              <Button variant="outlined" fullWidth onClick={() => setShowAddToListDrawer(false)}>Nei takk</Button>
-              <Button variant="contained" fullWidth disabled={addingToList || (!selectedListCategory || (selectedListCategory === -1 && !newCategoryName))} onClick={handleAddToList}>
-                Ja, legg til
-              </Button>
-            </Box>
-          </Box>
-        ) : (
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={4}>
-            <Typography variant="h6" color="success.main" mb={2}>Lagt til i vareliste!</Typography>
-          </Box>
-        )}
-      </Drawer>
-
-      {/* Menu for item actions */}
-      <Menu
-        anchorEl={menuAnchorEl}
-        open={Boolean(menuAnchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+      {/* Edit Item Options Drawer */}
+      <Drawer
+        anchor="bottom"
+        open={editItemDrawerOpen}
+        onClose={() => setEditItemDrawerOpen(false)}
+        PaperProps={{
+          sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 }
         }}
       >
-        <MenuItem onClick={handleEditQuantity} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Edit size={18} />
-          Endre antall
-        </MenuItem>
-        <MenuItem onClick={handleDeleteItem} sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
-          <Trash size={18} />
-          Fjern vare
-        </MenuItem>
-      </Menu>
+        <Box sx={{ p: 3, pb: 6 }}>
+          <Typography variant="h6" gutterBottom textAlign="center">
+            {editingItem?.name}
+          </Typography>
 
-      {/* Edit quantity drawer */}
+          <Typography variant="body2" color="text.secondary" textAlign="center" mb={3}>
+            {editingItem?.quantity} stk x {editingItem?.unitPrice?.toLocaleString('no-NO')} kr
+          </Typography>
+
+          <Stack spacing={2}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleEditQuantity}
+              sx={{
+                py: 1.5,
+                textTransform: 'none',
+                fontWeight: 500
+              }}
+            >
+              Endre antall
+            </Button>
+
+            <Button
+              fullWidth
+              variant="outlined"
+              color="error"
+              startIcon={<Delete />}
+              onClick={handleDeleteItem}
+              disabled={deleteOfferItemMutation.isPending}
+              sx={{
+                py: 1.5,
+                textTransform: 'none',
+                fontWeight: 500
+              }}
+            >
+              {deleteOfferItemMutation.isPending ? 'Sletter...' : 'Slett vare'}
+            </Button>
+
+            <Button
+              fullWidth
+              variant="text"
+              onClick={() => setEditItemDrawerOpen(false)}
+              sx={{
+                textTransform: 'none',
+                color: 'text.secondary'
+              }}
+            >
+              Avbryt
+            </Button>
+          </Stack>
+        </Box>
+      </Drawer>
+
+      {/* Edit Quantity Drawer */}
       <QuantityDrawer
         open={editQuantityDrawerOpen}
         onClose={() => setEditQuantityDrawerOpen(false)}
         quantity={editQuantity}
-        onPad={handleEditQuantityPad}
+        onPad={(val) => {
+          if (val === 'del') {
+            setEditQuantity(q => q.length > 1 ? q.slice(0, -1) : '')
+          } else if (val === 'ok') {
+            handleUpdateQuantity()
+          } else {
+            setEditQuantity(q => (q + val).replace(/^0+/, ''))
+          }
+        }}
         title="Endre antall"
-        itemInfo={editingItem && { name: editingItem.name }}
+        itemInfo={editingItem ? {
+          name: editingItem.name,
+          price: editingItem.unitPrice
+        } : undefined}
       />
-    </Container>
-  );
+    </>
+  )
 }
-

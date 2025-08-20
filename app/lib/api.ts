@@ -189,6 +189,38 @@ export const deleteItem = async (itemId: number): Promise<void> => {
   await apiDelete(`/api/items/${itemId}`)
 }
 
+// New API functions for mobile items interface
+export const getItemCategories = async (): Promise<{ id: number; name: string; count?: number }[]> => {
+  return await apiGet('/api/items/categories')
+}
+
+export const getItemsByCategory = async (params: { categoryId?: number; search?: string }) => {
+  const searchParams = new URLSearchParams()
+  if (params.categoryId) searchParams.append('categoryId', params.categoryId.toString())
+  if (params.search) searchParams.append('search', params.search)
+
+  const url = `/api/items${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const response = await apiGet(url)
+
+  // Return in the format expected by the hooks
+  return {
+    items: response || [],
+    nextPage: undefined,
+    total: (response || []).length
+  }
+}
+
+export const addOfferItem = async (params: { offerId: number; itemId: number; quantity: number }) => {
+  return await apiPost(`/api/offers/${params.offerId}/items`, {
+    itemId: params.itemId,
+    quantity: params.quantity
+  })
+}
+
 export const updateOffer = async (id: number, data: Partial<Offer>) => {
   return await apiPut(`/api/offers/${id}`, data)
+}
+
+export const fetchOfferHistory = async (offerId: number) => {
+  return await apiGet(`/api/offers/${offerId}/history`)
 }
