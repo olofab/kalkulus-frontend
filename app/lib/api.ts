@@ -224,3 +224,23 @@ export const updateOffer = async (id: number, data: Partial<Offer>) => {
 export const fetchOfferHistory = async (offerId: number) => {
   return await apiGet(`/api/offers/${offerId}/history`)
 }
+
+// Email API integration
+export interface SendOfferEmailRequest {
+  email: string
+  subject?: string
+  message?: string
+}
+
+export interface SendOfferEmailResponse {
+  success: boolean
+  message: string
+  emailSentTo?: string
+}
+
+export const sendOfferEmail = async (
+  offerId: string | number, 
+  emailData: SendOfferEmailRequest
+): Promise<SendOfferEmailResponse> => {
+  return await apiPost(`/api/offers/${offerId}/email`, emailData)
+}

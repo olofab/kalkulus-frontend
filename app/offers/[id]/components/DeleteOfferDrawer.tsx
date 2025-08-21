@@ -8,7 +8,8 @@ import {
   Button,
   Alert,
   Divider,
-  CircularProgress
+  CircularProgress,
+  alpha
 } from '@mui/material'
 import { Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Offer } from '../../../types/offer'
@@ -106,7 +107,17 @@ export default function DeleteOfferDrawer({ open, onClose, offer, onDelete }: De
         <Alert
           severity="warning"
           icon={<AlertTriangle size={20} />}
-          sx={{ mb: 2 }}
+          sx={{ 
+            mb: 2,
+            backgroundColor: theme => alpha(theme.palette.warning.main, 0.08),
+            color: theme => theme.palette.warning.dark, // Mørkere tekst
+            border: theme => `1px solid ${alpha(theme.palette.warning.main, 0.2)}`, // Subtil border
+            boxShadow: 'none',
+            borderRadius: 1,
+            '& .MuiAlert-icon': {
+              color: theme => theme.palette.warning.dark, // Mørkere ikon
+            },
+          }}
         >
           <Typography variant="body2">
             <strong>Advarsel:</strong> Denne handlingen kan ikke angres.
@@ -194,7 +205,19 @@ export default function DeleteOfferDrawer({ open, onClose, offer, onDelete }: De
 
         {/* Error state */}
         {error && (
-          <Alert severity="error">
+          <Alert 
+            severity="error"
+            sx={{
+              backgroundColor: theme => alpha(theme.palette.error.main, 0.08),
+              color: theme => theme.palette.error.dark, // Mørkere tekst
+              border: theme => `1px solid ${alpha(theme.palette.error.main, 0.2)}`, // Subtil border
+              boxShadow: 'none',
+              borderRadius: 1,
+              '& .MuiAlert-icon': {
+                color: theme => theme.palette.error.dark, // Mørkere ikon
+              },
+            }}
+          >
             {error}
           </Alert>
         )}

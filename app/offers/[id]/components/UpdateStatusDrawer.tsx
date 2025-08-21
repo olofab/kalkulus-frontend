@@ -10,7 +10,8 @@ import {
   MenuItem,
   CircularProgress,
   Alert,
-  Divider
+  Divider,
+  alpha
 } from '@mui/material'
 import { RefreshCw, CheckCircle } from 'lucide-react'
 import { Offer } from '../../../types/offer'
@@ -207,7 +208,19 @@ export default function UpdateStatusDrawer({ open, onClose, offer, onStatusUpdat
 
         {/* Error state */}
         {error && (
-          <Alert severity="error">
+          <Alert 
+            severity="error"
+            sx={{
+              backgroundColor: theme => alpha(theme.palette.error.main, 0.08),
+              color: theme => theme.palette.error.dark, // Mørkere tekst
+              border: theme => `1px solid ${alpha(theme.palette.error.main, 0.2)}`, // Subtil border
+              boxShadow: 'none',
+              borderRadius: 1,
+              '& .MuiAlert-icon': {
+                color: theme => theme.palette.error.dark, // Mørkere ikon
+              },
+            }}
+          >
             {error}
           </Alert>
         )}
@@ -217,6 +230,16 @@ export default function UpdateStatusDrawer({ open, onClose, offer, onStatusUpdat
           <Alert
             severity="success"
             icon={<CheckCircle size={20} />}
+            sx={{
+              backgroundColor: theme => alpha(theme.palette.success.main, 0.08),
+              color: theme => theme.palette.success.dark, // Mørkere tekst
+              border: theme => `1px solid ${alpha(theme.palette.success.main, 0.2)}`, // Subtil border
+              boxShadow: 'none',
+              borderRadius: 1,
+              '& .MuiAlert-icon': {
+                color: theme => theme.palette.success.dark, // Mørkere ikon
+              },
+            }}
           >
             Status oppdatert successfully!
           </Alert>

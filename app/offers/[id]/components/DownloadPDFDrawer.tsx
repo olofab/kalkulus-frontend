@@ -8,7 +8,8 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Divider
+  Divider,
+  alpha
 } from '@mui/material'
 import { Download, FileText, CheckCircle } from 'lucide-react'
 import { Offer } from '../../../types/offer'
@@ -137,7 +138,20 @@ export default function DownloadPDFDrawer({ open, onClose, offer }: DownloadPDFD
 
         {/* Error state */}
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mt: 2,
+              backgroundColor: theme => alpha(theme.palette.error.main, 0.08),
+              color: theme => theme.palette.error.dark, // Mørkere tekst
+              border: theme => `1px solid ${alpha(theme.palette.error.main, 0.2)}`, // Subtil border
+              boxShadow: 'none',
+              borderRadius: 1,
+              '& .MuiAlert-icon': {
+                color: theme => theme.palette.error.dark, // Mørkere ikon
+              },
+            }}
+          >
             {error}
           </Alert>
         )}
@@ -146,7 +160,17 @@ export default function DownloadPDFDrawer({ open, onClose, offer }: DownloadPDFD
         {downloadComplete && (
           <Alert
             severity="success"
-            sx={{ mt: 2 }}
+            sx={{ 
+              mt: 2,
+              backgroundColor: theme => alpha(theme.palette.success.main, 0.08),
+              color: theme => theme.palette.success.dark, // Mørkere tekst
+              border: theme => `1px solid ${alpha(theme.palette.success.main, 0.2)}`, // Subtil border
+              boxShadow: 'none',
+              borderRadius: 1,
+              '& .MuiAlert-icon': {
+                color: theme => theme.palette.success.dark, // Mørkere ikon
+              },
+            }}
             icon={<CheckCircle size={20} />}
           >
             PDF lastet ned successfully!

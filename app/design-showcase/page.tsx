@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Typography, Grid, Stack, Divider } from '@mui/material'
+import { Box, Typography, Grid, Stack, Divider, Alert, alpha } from '@mui/material'
 import {
   Button,
   IconButton,
@@ -30,6 +30,9 @@ import {
   TrendingUp,
   X,
   AlertCircle,
+  AlertTriangle,
+  Info,
+  CheckCircle,
   Home,
   Calendar,
   Mail,
@@ -258,6 +261,79 @@ export default function DesignShowcasePage() {
               </Stack>
             </Grid>
           </Grid>
+        </ComponentSection>
+
+        {/* Alerts */}
+        <ComponentSection title="Alerts" description="Soft button-style alert components with pastell colors">
+          <Stack spacing={2}>
+            <Alert
+              severity="error"
+              icon={<AlertCircle size={20} />}
+              sx={{
+                backgroundColor: theme => alpha(theme.palette.error.main, 0.08),
+                color: theme => theme.palette.error.main,
+                border: 'none',
+                boxShadow: 'none',
+                borderRadius: 1,
+                '& .MuiAlert-icon': {
+                  color: theme => theme.palette.error.main,
+                },
+              }}
+            >
+              Dette er en feilmelding med soft button styling
+            </Alert>
+            
+            <Alert
+              severity="warning"
+              icon={<AlertTriangle size={20} />}
+              sx={{
+                backgroundColor: theme => alpha(theme.palette.warning.main, 0.08),
+                color: theme => theme.palette.warning.main,
+                border: 'none',
+                boxShadow: 'none',
+                borderRadius: 1,
+                '& .MuiAlert-icon': {
+                  color: theme => theme.palette.warning.main,
+                },
+              }}
+            >
+              Dette er en advarsel med pastell bakgrunn og border radius 1
+            </Alert>
+            
+            <Alert
+              severity="success"
+              icon={<CheckCircle size={20} />}
+              sx={{
+                backgroundColor: theme => alpha(theme.palette.success.main, 0.08),
+                color: theme => theme.palette.success.main,
+                border: 'none',
+                boxShadow: 'none',
+                borderRadius: 1,
+                '& .MuiAlert-icon': {
+                  color: theme => theme.palette.success.main,
+                },
+              }}
+            >
+              Operasjonen var vellykket! Soft button stil med border radius 1
+            </Alert>
+            
+            <Alert
+              severity="info"
+              icon={<Info size={20} />}
+              sx={{
+                backgroundColor: theme => alpha(theme.palette.info.main, 0.08),
+                color: theme => theme.palette.info.main,
+                border: 'none',
+                boxShadow: 'none',
+                borderRadius: 1,
+                '& .MuiAlert-icon': {
+                  color: theme => theme.palette.info.main,
+                },
+              }}
+            >
+              Informasjon vises med samme design som soft buttons
+            </Alert>
+          </Stack>
         </ComponentSection>
 
         {/* Chips and Badges */}
