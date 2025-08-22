@@ -138,9 +138,9 @@ export default function DownloadPDFDrawer({ open, onClose, offer }: DownloadPDFD
 
         {/* Error state */}
         {error && (
-          <Alert 
-            severity="error" 
-            sx={{ 
+          <Alert
+            severity="error"
+            sx={{
               mt: 2,
               backgroundColor: theme => alpha(theme.palette.error.main, 0.08),
               color: theme => theme.palette.error.dark, // Mørkere tekst
@@ -160,7 +160,7 @@ export default function DownloadPDFDrawer({ open, onClose, offer }: DownloadPDFD
         {downloadComplete && (
           <Alert
             severity="success"
-            sx={{ 
+            sx={{
               mt: 2,
               backgroundColor: theme => alpha(theme.palette.success.main, 0.08),
               color: theme => theme.palette.success.dark, // Mørkere tekst

@@ -208,7 +208,7 @@ export default function UpdateStatusDrawer({ open, onClose, offer, onStatusUpdat
 
         {/* Error state */}
         {error && (
-          <Alert 
+          <Alert
             severity="error"
             sx={{
               backgroundColor: theme => alpha(theme.palette.error.main, 0.08),

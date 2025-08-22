@@ -107,7 +107,7 @@ export default function DeleteOfferDrawer({ open, onClose, offer, onDelete }: De
         <Alert
           severity="warning"
           icon={<AlertTriangle size={20} />}
-          sx={{ 
+          sx={{
             mb: 2,
             backgroundColor: theme => alpha(theme.palette.warning.main, 0.08),
             color: theme => theme.palette.warning.dark, // Mørkere tekst
@@ -205,7 +205,7 @@ export default function DeleteOfferDrawer({ open, onClose, offer, onDelete }: De
 
         {/* Error state */}
         {error && (
-          <Alert 
+          <Alert
             severity="error"
             sx={{
               backgroundColor: theme => alpha(theme.palette.error.main, 0.08),

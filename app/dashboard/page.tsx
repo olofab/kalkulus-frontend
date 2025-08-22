@@ -1,25 +1,21 @@
 'use client'
 import {
-  Avatar, Box, Chip, IconButton, Stack, TextField, Typography,
-  InputAdornment, Skeleton,
+  Avatar, Box, Stack, Typography,
+  Skeleton,
   Grid,
-  Alert,
-  Link,
-  Card
+  Alert
 } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Offer } from '../types/offer'
 import { apiGet } from '../lib/api'
-import { User, Bell, Search, Plus } from 'lucide-react'
 import { useAppContext } from '../lib/AppContext'
 import dayjs from 'dayjs'
 import SearchBarWithResults from './components/Search'
-import { ClipboardList, PackageSearch, FileSearch, ArrowRight } from 'lucide-react'
 import { getStatusStyle } from '../offers/utils/StatusStyle'
 import Image from 'next/image'
 import NewOfferDrawer from '../offers/components/CreateOfferDrawer'
-import { Button, tokens } from '../design'
+import { tokens } from '../design'
 import { Card as DesignCard } from '../design'
 
 

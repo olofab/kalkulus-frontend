@@ -20,6 +20,7 @@ import { useOfferItems } from '../../hooks/useOfferItems'
 import { useAddTemplateToOffer, useAddCustomItemToOffer, useUpdateOfferItem, useDeleteOfferItem } from '../../../items/hooks/useItems'
 import TopBar from '../../../components/TopBar'
 import { QuantityDrawer } from './Drawers'
+import SaveAsTemplateDrawer from '../components/SaveAsTemplateDrawer'
 // Import only Button from design system
 import { Button, Tabs } from '../../../design'
 
@@ -49,6 +50,10 @@ export default function ItemsPage() {
   const [customPrice, setCustomPrice] = useState('')
   const [customQuantityDrawerOpen, setCustomQuantityDrawerOpen] = useState(false)
   const [customQuantity, setCustomQuantity] = useState('')
+
+  // Save as template states
+  const [saveAsTemplateDrawerOpen, setSaveAsTemplateDrawerOpen] = useState(false)
+  const [lastAddedItem, setLastAddedItem] = useState<{ name: string; price: number } | null>(null)
 
   // Edit existing item states
   const [editItemDrawerOpen, setEditItemDrawerOpen] = useState(false)
@@ -128,11 +133,21 @@ export default function ItemsPage() {
         quantity: Number(customQuantity)
       })
 
+      // Store the item info for the SaveAsTemplate drawer
+      setLastAddedItem({
+        name: customName,
+        price: Number(customPrice)
+      })
+
+      // Reset form
       setCustomDrawerOpen(false)
       setCustomQuantityDrawerOpen(false)
       setCustomName('')
       setCustomPrice('')
       setCustomQuantity('')
+
+      // Show SaveAsTemplate drawer
+      setSaveAsTemplateDrawerOpen(true)
 
       // Stay on items page to continue adding more items
     } catch (error) {
@@ -700,6 +715,21 @@ export default function ItemsPage() {
           name: editingItem.name,
           price: editingItem.unitPrice
         } : undefined}
+      />
+
+      {/* Save As Template Drawer */}
+      <SaveAsTemplateDrawer
+        open={saveAsTemplateDrawerOpen}
+        onClose={() => {
+          setSaveAsTemplateDrawerOpen(false)
+          setLastAddedItem(null)
+        }}
+        itemName={lastAddedItem?.name || ''}
+        itemPrice={lastAddedItem?.price || 0}
+        onSave={() => {
+          // Optional: Refresh templates or show success message
+          console.log('Template saved successfully!')
+        }}
       />
     </>
   )

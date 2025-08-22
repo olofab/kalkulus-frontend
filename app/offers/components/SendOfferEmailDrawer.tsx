@@ -1,11 +1,11 @@
 'use client'
 
-import { 
-  Box, 
-  Typography, 
-  Drawer, 
-  TextField, 
-  IconButton, 
+import {
+  Box,
+  Typography,
+  Drawer,
+  TextField,
+  IconButton,
   Alert,
   Stack,
   Button as MuiButton,
@@ -80,14 +80,14 @@ export default function SendOfferEmailDrawer({
       anchor="bottom"
       open={open}
       onClose={handleClose}
-      PaperProps={{ 
-        sx: { 
-          borderTopLeftRadius: 16, 
-          borderTopRightRadius: 16, 
-          p: 3, 
+      PaperProps={{
+        sx: {
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          p: 3,
           minHeight: 280,
           maxHeight: '90vh'
-        } 
+        }
       }}
     >
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
@@ -116,8 +116,8 @@ export default function SendOfferEmailDrawer({
         />
 
         {!showAdvanced && (
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={() => setShowAdvanced(true)}
             disabled={isLoading}
           >
@@ -147,8 +147,8 @@ export default function SendOfferEmailDrawer({
               placeholder="Hei! Her er tilbudet som forespurt..."
             />
 
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               onClick={() => setShowAdvanced(false)}
               disabled={isLoading}
             >

@@ -11,6 +11,7 @@ type ItemTemplatesStore = {
   error: string | null
   fetchTemplates: () => Promise<void>
   fetchCategories: () => Promise<void>
+  refreshAll: () => Promise<void>
 }
 
 export const useItemTemplatesStore = create<ItemTemplatesStore>((set) => ({
@@ -38,6 +39,26 @@ export const useItemTemplatesStore = create<ItemTemplatesStore>((set) => ({
       set({ categories: res, loading: false })
     } catch (err: any) {
       set({ error: 'Klarte ikke hente kategorier', loading: false })
+      console.error(err)
+    }
+  },
+
+  refreshAll: async () => {
+    set({ loading: true, error: null })
+    try {
+      // Fetch both templates and categories in parallel
+      const [templatesRes, categoriesRes] = await Promise.all([
+        apiGet('/api/items/templates'),
+        apiGet('/api/categories')
+      ])
+
+      set({
+        templates: templatesRes,
+        categories: categoriesRes,
+        loading: false
+      })
+    } catch (err: any) {
+      set({ error: 'Klarte ikke oppdatere data', loading: false })
       console.error(err)
     }
   }

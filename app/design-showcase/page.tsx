@@ -282,7 +282,7 @@ export default function DesignShowcasePage() {
             >
               Dette er en feilmelding med soft button styling
             </Alert>
-            
+
             <Alert
               severity="warning"
               icon={<AlertTriangle size={20} />}
@@ -299,7 +299,7 @@ export default function DesignShowcasePage() {
             >
               Dette er en advarsel med pastell bakgrunn og border radius 1
             </Alert>
-            
+
             <Alert
               severity="success"
               icon={<CheckCircle size={20} />}
@@ -316,7 +316,7 @@ export default function DesignShowcasePage() {
             >
               Operasjonen var vellykket! Soft button stil med border radius 1
             </Alert>
-            
+
             <Alert
               severity="info"
               icon={<Info size={20} />}

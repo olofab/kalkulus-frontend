@@ -44,7 +44,7 @@ export default function OfferSummaryPage() {
     try {
       // Update offer status to PENDING when email is sent
       await apiPut(`/api/offers/${id}/status`, { status: 'PENDING' })
-      
+
       setSuccessToast({
         open: true,
         message,

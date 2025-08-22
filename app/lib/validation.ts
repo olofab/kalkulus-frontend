@@ -17,11 +17,11 @@ export const validateEmail = (email: string): string | null => {
   if (!email.trim()) {
     return 'E-postadresse er påkrevd'
   }
-  
+
   if (!isValidEmail(email)) {
     return 'Ugyldig e-postadresse'
   }
-  
+
   return null
 }
 

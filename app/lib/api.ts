@@ -239,7 +239,7 @@ export interface SendOfferEmailResponse {
 }
 
 export const sendOfferEmail = async (
-  offerId: string | number, 
+  offerId: string | number,
   emailData: SendOfferEmailRequest
 ): Promise<SendOfferEmailResponse> => {
   return await apiPost(`/api/offers/${offerId}/email`, emailData)

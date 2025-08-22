@@ -1,241 +1,250 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import {
   Box,
+  Chip,
+  Stack,
   Typography,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  alpha,
+  Fab,
   TextField,
-  Button,
-  Paper,
-  Drawer,
-  Stack
+  MenuItem
 } from '@mui/material'
-import { Plus, Trash2, Pencil, X } from 'lucide-react'
-import { useState } from 'react'
-import {
-  useItems,
-  useCategories,
-  useCreateItem,
-  useUpdateItem,
-  useDeleteItem
-} from './hooks/useItems'
-import NewItemDrawer from './components/Drawer'
-import EmptyState from '../components/common/EmptyState'
-
-type Item = {
-  id: number
-  name: string
-  unitPrice: number
-  categories: { id: number; name: string }[]
-}
-
-type Category = {
-  id: number
-  name: string
-}
+import { Plus } from 'lucide-react'
+import Card from '../design/components/Card'
+import { useItemTemplatesStore } from '../store/useItemTemplatesStore'
+import { useRouter } from 'next/navigation'
+import ItemActionDrawer from './components/ItemActionDrawer'
+import { useEffect } from 'react'
 
 export default function ItemsPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [editItem, setEditItem] = useState<Item | null>(null)
-  const [editPrice, setEditPrice] = useState('')
-  const [itemToDelete, setItemToDelete] = useState<Item | null>(null)
+  const router = useRouter()
+  const {
+    templates: itemTemplates,
+    categories,
+    loading,
+    fetchTemplates,
+    fetchCategories,
+    refreshAll
+  } = useItemTemplatesStore()
 
-  const { data: items = [] } = useItems()
-  const { data: categories = [] } = useCategories()
-  const createItem = useCreateItem()
-  const updateItem = useUpdateItem()
-  const deleteItem = useDeleteItem()
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [selectedItem, setSelectedItem] = useState<{
+    id: number
+    name: string
+    unitPrice: number
+    categories: { id: number; name: string }[]
+  } | null>(null)
+  const [actionDrawerOpen, setActionDrawerOpen] = useState(false)
 
-  const groupedItems = categories.reduce((acc: Record<string, Item[]>, cat) => {
-    acc[cat.name] = items.filter(item =>
-      item.categories.some((c) => c.id === cat.id)
-    )
-    return acc
-  }, {})
+  // Fetch data on mount
+  useEffect(() => {
+    fetchTemplates()
+    fetchCategories()
+  }, [fetchTemplates, fetchCategories])
 
-  const uncategorizedItems = items.filter(item => item.categories.length === 0)
-  if (uncategorizedItems.length > 0) {
-    groupedItems['Annet'] = uncategorizedItems
+  const filteredItems = useMemo(() => {
+    if (!itemTemplates) return []
+
+    let items = selectedCategory === null
+      ? itemTemplates
+      : itemTemplates.filter(item =>
+        item.categories?.some(cat => cat.id === selectedCategory)
+      )
+
+    // Sort by category name, then by item name
+    return items.sort((a, b) => {
+      const aCategoryName = a.categories?.[0]?.name || 'Zzz_Ingen kategori'
+      const bCategoryName = b.categories?.[0]?.name || 'Zzz_Ingen kategori'
+
+      if (aCategoryName !== bCategoryName) {
+        return aCategoryName.localeCompare(bCategoryName)
+      }
+
+      return a.name.localeCompare(b.name)
+    })
+  }, [itemTemplates, selectedCategory])
+
+  const handleItemClick = (item: any) => {
+    setSelectedItem(item)
+    setActionDrawerOpen(true)
   }
 
-  const handleEdit = () => {
-    if (!editItem || !editPrice) return
-    const parsedPrice = parseFloat(editPrice)
-    if (isNaN(parsedPrice)) return
-    updateItem.mutate({ id: editItem.id, data: { ...editItem, unitPrice: parsedPrice } })
-    setEditItem(null)
+  const handleUpdatePrice = async (itemId: number, newPrice: number) => {
+    // TODO: Implement API call when available
+    console.log('Update price:', itemId, newPrice)
+    await refreshAll()
+  }
+
+  const handleUpdateCategory = async (itemId: number, categoryId: number) => {
+    // TODO: Implement API call when available
+    console.log('Update category:', itemId, categoryId)
+    await refreshAll()
+  }
+
+  const handleDeleteItem = async (itemId: number) => {
+    // TODO: Implement API call when available
+    console.log('Delete item:', itemId)
+    await refreshAll()
+  }
+
+  const uniqueCategories = useMemo(() => {
+    if (!itemTemplates) return []
+
+    const categoryMap = new Map<number, { id: number; name: string; count: number }>()
+
+    itemTemplates.forEach(item => {
+      if (item.categories) {
+        item.categories.forEach(cat => {
+          if (categoryMap.has(cat.id)) {
+            categoryMap.get(cat.id)!.count++
+          } else {
+            categoryMap.set(cat.id, { ...cat, count: 1 })
+          }
+        })
+      }
+    })
+
+    return Array.from(categoryMap.values())
+  }, [itemTemplates])
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+        <Typography>Laster...</Typography>
+      </Box>
+    )
   }
 
   return (
-    <Box p={2} pt={0}>
-      {items.length === 0 &&
-        <EmptyState
-          title="Ingen lagrede varer"
-          description="Alle lagrede varer og kategorier vil vises her"
-          imageSrc="/illustrations/empty-box.png"
+    <Box sx={{ pb: 10 }}>
 
-        />
-
-      }
-
-
-      {Object.entries(groupedItems).map(([catName, items]) => (
-        <Box key={catName} mb={4}>
-          <Typography variant="h6" mb={1}>{catName}</Typography>
-          <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', mb: 2 }}>
-            {items.length > 0 ? (
-              <List>
-                {items.map((item, index) => (
-                  <ListItem
-                    key={item.id}
-                    sx={{
-                      borderTop: index === 0 ? 'none' : '1px solid #eee',
-                    }}
-                    secondaryAction={
-                      <Box display="flex" gap={1}>
-                        <IconButton onClick={() => {
-                          setEditItem(item)
-                          setEditPrice(item.unitPrice.toString())
-                        }}>
-                          <Pencil size={18} />
-                        </IconButton>
-                        <IconButton onClick={() => setItemToDelete(item)}>
-                          <Trash2 size={18} />
-                        </IconButton>
-                      </Box>
-                    }
-                  >
-                    <ListItemText
-                      primary={item.name}
-                      secondary={`${item.unitPrice.toFixed(2)} kr/stk`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-
-              <Typography variant="body2" px={2} py={2} textAlign="center" color="text.secondary">
-                Ingen varer i denne kategorien
-              </Typography>
-
-            )}
-          </Paper>
-        </Box>
-      ))
-      }
-
-      {/* Drawer for å legge til ny vare */}
-      <NewItemDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onSubmit={(form) => {
-          createItem.mutate({
-            name: form.name,
-            unitPrice: parseFloat(form.unitPrice),
-            categoryId: form.categoryIds[0] // Assuming you want to use the first selected category
-          })
-          setDrawerOpen(false)
-        }}
-      />
-
-      {/* Rediger-dialog */}
-      <Drawer
-        anchor="bottom"
-        open={!!editItem}
-        onClose={() => setEditItem(null)}
-        PaperProps={{ sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}>
-        {/* Header */}
-        <Box display="flex" alignItems="center" px={3} py={2}>
-          <Typography variant="h6" flexGrow={1}>
-            Rediger {editItem?.name}
-          </Typography>
-          <IconButton edge="end" onClick={() => setEditItem(null)}>
-            <X size={18} />
-          </IconButton>
-        </Box>
-
-        {/* Body */}
-        <Box px={3} py={2} flex="1 1 auto" overflow="auto">
+      <Box sx={{ px: 2, mt: 2 }}>
+        {/* Category dropdown */}
+        <Box sx={{ mb: 3 }}>
           <TextField
-            label="Enhetspris"
+            select
             fullWidth
-            type="number"
-            value={editPrice}
-            onChange={(e) => setEditPrice(e.target.value)}
-            sx={{ mt: 1 }}
-          />
-        </Box>
-
-        {/* Actions */}
-        <Box px={3} py={2}>
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button onClick={() => setEditItem(null)}>Avbryt</Button>
-            <Button variant="contained" onClick={handleEdit}>Lagre</Button>
+            label="Kategori"
+            value={selectedCategory || 'alle'}
+            onChange={(e) => setSelectedCategory(e.target.value === 'alle' ? null : Number(e.target.value))}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1,
+                '& .MuiSelect-select': {
+                  py: 1.5
+                }
+              }
+            }}
+          >
+            <MenuItem value="alle">
+              Alle ({itemTemplates?.length || 0})
+            </MenuItem>
+            {uniqueCategories.map(category => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name} ({category.count})
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>        {/* Items */}
+        {filteredItems.length === 0 ? (
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 6,
+              backgroundColor: theme => alpha(theme.palette.info.main, 0.08),
+              border: theme => `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+              borderRadius: 1,
+              color: theme => theme.palette.info.dark
+            }}
+          >
+            <Typography variant="h6" fontWeight={500} mb={1}>
+              {selectedCategory === null ? "Ingen varemaler" : "Ingen varer i kategori"}
+            </Typography>
+            <Typography variant="body2">
+              {selectedCategory === null ?
+                "Du har ikke opprettet noen varemaler ennå. Legg til en ny varemal for å komme i gang." :
+                "Det er ingen varer i denne kategorien. Prøv å velge en annen kategori eller legg til en ny vare."
+              }
+            </Typography>
+          </Box>
+        ) : (
+          <Stack spacing={0.5}>
+            {filteredItems.map((item) => (
+              <Card
+                key={item.id}
+                onClick={() => handleItemClick(item)}
+                sx={{
+                  p: 0.5,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    boxShadow: theme => theme.shadows[1],
+                  }
+                }}
+              >
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box flex={1}>
+                    <Typography variant="body1" fontWeight={500}>
+                      {item.name}
+                    </Typography>
+                    <Typography variant="caption" color="primary" fontWeight={600}>
+                      {item.unitPrice?.toLocaleString() || 0} kr
+                    </Typography>
+                  </Box>
+                  {item.categories && item.categories.length > 0 && (
+                    <Chip
+                      label={item.categories[0].name}
+                      size="small"
+                      sx={{
+                        backgroundColor: theme => alpha(theme.palette.primary.main, 0.08),
+                        color: 'primary.main',
+                        fontSize: '0.75rem',
+                        height: 18,
+                        borderRadius: 0.5,
+                        '& .MuiChip-label': {
+                          px: 0.5
+                        }
+                      }}
+                    />
+                  )}
+                </Box>
+              </Card>
+            ))}
           </Stack>
-        </Box>
-      </Drawer>
-
-      {/* Slett-dialog */}
-      <Drawer
-        anchor="bottom"
-        open={!!itemToDelete}
-        onClose={() => setItemToDelete(null)}
-        PaperProps={{ sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}>
-
-        {/* Header */}
-        <Box display="flex" alignItems="center" px={3} py={2}>
-          <Typography variant="h6" flexGrow={1}>
-            Vil du slette {itemToDelete?.name}?
-          </Typography>
-          <IconButton edge="end" onClick={() => setEditItem(null)}>
-            <X size={18} />
-          </IconButton>
-        </Box>
-        <Box px={3} py={2}>
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button onClick={() => setItemToDelete(null)}>Avbryt</Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => {
-                deleteItem.mutate(itemToDelete!.id)
-                setItemToDelete(null)
-              }}
-            >
-              Slett
-            </Button>
-          </Stack>
-        </Box>
-      </Drawer>
-      <Box
-        position="fixed"
-        bottom={48}
-        left="50%"
-        sx={{ transform: 'translateX(-50%)', zIndex: 1000 }}
-      >
-        <Button
-          onClick={() => setDrawerOpen(true)}
-          variant="contained"
-          color="primary"
-          sx={{
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            minWidth: 0,
-            boxShadow: 4,
-            p: 0,
-          }}
-        >
-          <Plus size={24} />
-        </Button>
+        )}
       </Box>
-    </Box >
+
+      {/* Add new item FAB */}
+      <Fab
+        color="primary"
+        aria-label="legg til varemal"
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 1000
+        }}
+        onClick={() => router.push('/items/new')}
+      >
+        <Plus size={24} />
+      </Fab>
+
+      {/* Item Action Drawer */}
+      <ItemActionDrawer
+        open={actionDrawerOpen}
+        onClose={() => {
+          setActionDrawerOpen(false)
+          setSelectedItem(null)
+        }}
+        item={selectedItem}
+        categories={categories || []}
+        onUpdatePrice={handleUpdatePrice}
+        onUpdateCategory={handleUpdateCategory}
+        onDelete={handleDeleteItem}
+      />
+    </Box>
   )
 }

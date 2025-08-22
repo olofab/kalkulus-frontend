@@ -8,22 +8,18 @@ import {
   Typography,
   Divider,
   List,
-  ListItemText,
-  useTheme,
   CircularProgress,
   ListItemButton,
   Avatar,
 } from '@mui/material'
 import { useOfferSearch } from '../hooks/useOfferSearch'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { Search } from 'lucide-react'
 import { getStatusStyle } from '../../offers/utils/StatusStyle'
 
 export default function SearchBarWithResults() {
   const [query, setQuery] = useState('')
   const { data: offers = [], isLoading } = useOfferSearch(query)
-  const theme = useTheme();
   const router = useRouter()
   const [showNoResults, setShowNoResults] = useState(false);
 
@@ -46,7 +42,7 @@ export default function SearchBarWithResults() {
           alignItems: 'center',
           px: 2,
           py: 1,
-          borderRadius: 2,
+          borderRadius: 1,
           backgroundColor: 'background.paper',
           boxShadow: 0
         }}
