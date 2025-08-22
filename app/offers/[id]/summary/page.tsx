@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useOffer } from '../../hooks/useOffer'
 import { useOfferItems } from '../../hooks/useOfferItems'
 import { FileText, Send } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { apiPut } from '../../../lib/api'
 import Image from 'next/image'
 import { OfferStatus } from '../../../types/offer' // Import the enum
@@ -40,26 +40,31 @@ export default function OfferSummaryPage() {
   const vatAmount = offer ? Math.round(offer.totalSum * 0.25) : 0
   const totalInclVat = offer ? offer.totalSum + vatAmount : 0
 
-  const handleEmailSuccess = async (message: string, emailSentTo: string) => {
+  const handleEmailSuccess = useCallback(async (message: string, emailSentTo: string) => {
     try {
       // Update offer status to PENDING when email is sent
       await apiPut(`/api/offers/${id}/status`, { status: 'PENDING' })
 
-      setSuccessToast({
-        open: true,
-        message,
-        email: emailSentTo
-      })
+      // Use setTimeout to defer state update to next tick
+      setTimeout(() => {
+        setSuccessToast({
+          open: true,
+          message,
+          email: emailSentTo
+        })
+      }, 0)
     } catch (err) {
       console.error('Failed to update offer status:', err)
       // Still show success message for email sending
-      setSuccessToast({
-        open: true,
-        message,
-        email: emailSentTo
-      })
+      setTimeout(() => {
+        setSuccessToast({
+          open: true,
+          message,
+          email: emailSentTo
+        })
+      }, 0)
     }
-  }
+  }, [id])
 
   return (
     <>

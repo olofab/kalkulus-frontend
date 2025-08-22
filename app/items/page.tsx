@@ -126,15 +126,47 @@ export default function ItemsPage() {
           <TextField
             select
             fullWidth
-            label="Kategori"
             value={selectedCategory || 'alle'}
             onChange={(e) => setSelectedCategory(e.target.value === 'alle' ? null : Number(e.target.value))}
+            SelectProps={{
+              renderValue: (value) => {
+                const selectedText = value === 'alle'
+                  ? `Alle (${itemTemplates?.length || 0})`
+                  : uniqueCategories.find(cat => cat.id === value)?.name + ` (${uniqueCategories.find(cat => cat.id === value)?.count || 0})`
+                return (
+                  <Box display="flex" alignItems="center">
+                    <Box component="span" sx={{ color: '#666', fontSize: '1rem', fontWeight: 400, mr: 1 }}>
+                      Kategori
+                    </Box>
+                    <Box component="span" sx={{ color: '#999', fontSize: '1rem', fontWeight: 300, mr: 1 }}>
+                      |
+                    </Box>
+                    <Box component="span" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                      {selectedText}
+                    </Box>
+                  </Box>
+                )
+              }
+            }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 1,
+                backgroundColor: 'white',
+                border: '2px solid #e0e0e0',
+                fontSize: '1.1rem',
+                fontWeight: 500,
                 '& .MuiSelect-select': {
-                  py: 1.5
+                  py: 2,
+                  display: 'flex',
+                  alignItems: 'center'
                 }
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none'
+              },
+              '& .MuiSelect-icon': {
+                fontSize: '1.5rem',
+                color: '#666'
               }
             }}
           >
